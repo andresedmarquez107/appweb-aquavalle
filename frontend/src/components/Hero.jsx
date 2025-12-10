@@ -1,14 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MapPin, Phone } from 'lucide-react';
 import { Button } from './ui/button';
+import { ReservationWizard } from './ReservationWizard';
 
 export const Hero = () => {
-  const scrollToReservar = () => {
-    const element = document.getElementById('reservar');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   return (
     <section id="inicio" className="relative pt-16 min-h-screen flex items-center overflow-hidden">
