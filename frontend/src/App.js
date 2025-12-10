@@ -7,8 +7,8 @@ import { Services } from './components/Services';
 import { Rooms } from './components/Rooms';
 import { Gallery } from './components/Gallery';
 import { Rules } from './components/Rules';
-import { ReservationForm } from './components/ReservationForm';
 import { Footer } from './components/Footer';
+import { FloatingReserveButton } from './components/FloatingReserveButton';
 
 function App() {
   return (
@@ -19,8 +19,8 @@ function App() {
       <Rooms />
       <Gallery />
       <Rules />
-      <ReservationForm />
       <Footer />
+      <FloatingReserveButton />
       <Toaster position="top-center" richColors />
     </div>
   );
