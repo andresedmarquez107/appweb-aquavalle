@@ -73,12 +73,14 @@ export const Navbar = () => {
             <button onClick={() => scrollToSection('reglas')} className="block w-full text-left px-3 py-2 text-stone-700 hover:bg-emerald-50 rounded">
               Reglas
             </button>
-            <button onClick={() => scrollToSection('reservar')} className="block w-full text-left px-3 py-2 bg-emerald-700 text-white hover:bg-emerald-800 rounded">
+            <button onClick={() => { setIsWizardOpen(true); setIsOpen(false); }} className="block w-full text-left px-3 py-2 bg-emerald-700 text-white hover:bg-emerald-800 rounded">
               Reservar
             </button>
           </div>
         </div>
       )}
+      
+      <ReservationWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} />
     </nav>
   );
 };
