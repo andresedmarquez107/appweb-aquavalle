@@ -46,7 +46,7 @@ export const Hero = () => {
 
             <div className="flex flex-wrap gap-4 pt-6">
               <Button 
-                onClick={scrollToReservar}
+                onClick={() => setIsWizardOpen(true)}
                 size="lg" 
                 className="bg-emerald-700 hover:bg-emerald-800 text-white px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
               >
@@ -65,6 +65,8 @@ export const Hero = () => {
               </Button>
             </div>
           </div>
+
+          <ReservationWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} />
 
           {/* Right image */}
           <div className="relative">
