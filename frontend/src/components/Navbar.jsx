@@ -40,7 +40,7 @@ export const Navbar = () => {
             <button onClick={() => scrollToSection('reglas')} className="text-stone-700 hover:text-emerald-700 transition-colors font-medium">
               Reglas
             </button>
-            <Button onClick={() => scrollToSection('reservar')} className="bg-emerald-700 hover:bg-emerald-800 text-white">
+            <Button onClick={() => setIsWizardOpen(true)} className="bg-emerald-700 hover:bg-emerald-800 text-white">
               Reservar
             </Button>
           </div>
