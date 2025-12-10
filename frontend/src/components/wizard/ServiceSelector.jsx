@@ -51,7 +51,7 @@ export const ServiceSelector = ({ onSelect }) => {
               />
               
               {/* Gradient overlay */}
-              <div className={`absolute inset-0 bg-gradient-to-t ${service.color} transition-opacity duration-300 ${
+              <div className={`absolute inset-0 bg-gradient-to-t ${service.color} transition-opacity duration-300 pointer-events-none ${
                 isHovered ? 'opacity-0' : 'opacity-40'
               }`}></div>
               
