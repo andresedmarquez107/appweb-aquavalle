@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from './ui/button';
+import { ReservationWizard } from './ReservationWizard';
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
