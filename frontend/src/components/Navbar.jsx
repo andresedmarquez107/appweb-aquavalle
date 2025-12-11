@@ -20,20 +20,45 @@ export const Navbar = () => {
           
           {/* Desktop menu */}
           <div className="hidden md:flex space-x-6">
-            <button onClick={() => scrollToSection('inicio')} className="text-stone-700 hover:text-emerald-700 transition-colors font-medium">
+            <button 
+              onClick={() => navigate('/')} 
+              className={`transition-colors font-medium ${
+                location.pathname === '/' ? 'text-emerald-700' : 'text-stone-700 hover:text-emerald-700'
+              }`}
+            >
               Inicio
             </button>
-            <button onClick={() => scrollToSection('servicios')} className="text-stone-700 hover:text-emerald-700 transition-colors font-medium">
+            <button 
+              onClick={() => navigate('/servicios')} 
+              className={`transition-colors font-medium ${
+                location.pathname === '/servicios' ? 'text-emerald-700' : 'text-stone-700 hover:text-emerald-700'
+              }`}
+            >
               Servicios
             </button>
-            <button onClick={() => scrollToSection('habitaciones')} className="text-stone-700 hover:text-emerald-700 transition-colors font-medium">
+            <button 
+              onClick={() => navigate('/habitaciones')} 
+              className={`transition-colors font-medium ${
+                location.pathname === '/habitaciones' ? 'text-emerald-700' : 'text-stone-700 hover:text-emerald-700'
+              }`}
+            >
               Habitaciones
             </button>
-            <button onClick={() => scrollToSection('galeria')} className="text-stone-700 hover:text-emerald-700 transition-colors font-medium">
-              Galería
-            </button>
-            <button onClick={() => scrollToSection('reglas')} className="text-stone-700 hover:text-emerald-700 transition-colors font-medium">
+            <button 
+              onClick={() => navigate('/reglas')} 
+              className={`transition-colors font-medium ${
+                location.pathname === '/reglas' ? 'text-emerald-700' : 'text-stone-700 hover:text-emerald-700'
+              }`}
+            >
               Reglas
+            </button>
+            <button 
+              onClick={() => navigate('/contacto')} 
+              className={`transition-colors font-medium ${
+                location.pathname === '/contacto' ? 'text-emerald-700' : 'text-stone-700 hover:text-emerald-700'
+              }`}
+            >
+              Contacto
             </button>
             <Button onClick={() => setIsWizardOpen(true)} className="bg-emerald-700 hover:bg-emerald-800 text-white">
               Reservar
