@@ -78,20 +78,20 @@ export const Navbar = () => {
       {isOpen && (
         <div className="md:hidden bg-white border-t">
           <div className="px-2 pt-2 pb-3 space-y-1">
-            <button onClick={() => scrollToSection('inicio')} className="block w-full text-left px-3 py-2 text-stone-700 hover:bg-emerald-50 rounded">
+            <button onClick={() => { navigate('/'); setIsOpen(false); }} className="block w-full text-left px-3 py-2 text-stone-700 hover:bg-emerald-50 rounded">
               Inicio
             </button>
-            <button onClick={() => scrollToSection('servicios')} className="block w-full text-left px-3 py-2 text-stone-700 hover:bg-emerald-50 rounded">
+            <button onClick={() => { navigate('/servicios'); setIsOpen(false); }} className="block w-full text-left px-3 py-2 text-stone-700 hover:bg-emerald-50 rounded">
               Servicios
             </button>
-            <button onClick={() => scrollToSection('habitaciones')} className="block w-full text-left px-3 py-2 text-stone-700 hover:bg-emerald-50 rounded">
+            <button onClick={() => { navigate('/habitaciones'); setIsOpen(false); }} className="block w-full text-left px-3 py-2 text-stone-700 hover:bg-emerald-50 rounded">
               Habitaciones
             </button>
-            <button onClick={() => scrollToSection('galeria')} className="block w-full text-left px-3 py-2 text-stone-700 hover:bg-emerald-50 rounded">
-              Galería
-            </button>
-            <button onClick={() => scrollToSection('reglas')} className="block w-full text-left px-3 py-2 text-stone-700 hover:bg-emerald-50 rounded">
+            <button onClick={() => { navigate('/reglas'); setIsOpen(false); }} className="block w-full text-left px-3 py-2 text-stone-700 hover:bg-emerald-50 rounded">
               Reglas
+            </button>
+            <button onClick={() => { navigate('/contacto'); setIsOpen(false); }} className="block w-full text-left px-3 py-2 text-stone-700 hover:bg-emerald-50 rounded">
+              Contacto
             </button>
             <button onClick={() => { setIsWizardOpen(true); setIsOpen(false); }} className="block w-full text-left px-3 py-2 bg-emerald-700 text-white hover:bg-emerald-800 rounded">
               Reservar
