@@ -95,14 +95,12 @@ export const Navbar = () => {
             <button onClick={() => { navigate('/contacto'); setIsOpen(false); }} className="block w-full text-left px-3 py-2 text-stone-700 hover:bg-emerald-50 rounded">
               Contacto
             </button>
-            <button onClick={() => { setIsWizardOpen(true); setIsOpen(false); }} className="block w-full text-left px-3 py-2 bg-emerald-700 text-white hover:bg-emerald-800 rounded">
+            <button onClick={() => { openWizard(); setIsOpen(false); }} className="block w-full text-left px-3 py-2 bg-emerald-700 text-white hover:bg-emerald-800 rounded">
               Reservar
             </button>
           </div>
         </div>
       )}
-      
-      <ReservationWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} />
     </nav>
   );
 };
