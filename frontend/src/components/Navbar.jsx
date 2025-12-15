@@ -62,7 +62,7 @@ export const Navbar = () => {
             >
               Contacto
             </button>
-            <Button onClick={() => setIsWizardOpen(true)} className="bg-emerald-700 hover:bg-emerald-800 text-white">
+            <Button onClick={openWizard} className="bg-emerald-700 hover:bg-emerald-800 text-white">
               Reservar
             </Button>
           </div>
