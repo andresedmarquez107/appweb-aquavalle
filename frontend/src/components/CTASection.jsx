@@ -48,7 +48,7 @@ export const CTASection = () => {
 
         <div className="flex flex-wrap justify-center gap-4">
           <Button
-            onClick={() => setIsWizardOpen(true)}
+            onClick={openWizard}
             size="lg"
             className="bg-white text-emerald-700 hover:bg-emerald-50 px-8 py-6 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
           >
@@ -66,8 +66,6 @@ export const CTASection = () => {
           </Button>
         </div>
       </div>
-
-      <ReservationWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} />
     </section>
   );
 };
