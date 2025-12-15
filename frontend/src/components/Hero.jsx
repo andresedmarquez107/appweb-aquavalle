@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { MapPin, Phone } from 'lucide-react';
 import { Button } from './ui/button';
-import { ReservationWizard } from './ReservationWizard';
+import { useReservation } from '../context/ReservationContext';
 
 export const Hero = () => {
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const { openWizard } = useReservation();
 
   return (
     <section id="inicio" className="relative pt-16 min-h-screen flex items-center overflow-hidden">
