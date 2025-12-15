@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from './ui/button';
-import { ReservationWizard } from './ReservationWizard';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useReservation } from '../context/ReservationContext';
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const { openWizard } = useReservation();
   const navigate = useNavigate();
   const location = useLocation();
 
