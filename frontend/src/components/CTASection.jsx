@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from './ui/button';
 import { Calendar, Home, Shield, MapPin } from 'lucide-react';
-import { ReservationWizard } from './ReservationWizard';
 import { useNavigate } from 'react-router-dom';
+import { useReservation } from '../context/ReservationContext';
 
 export const CTASection = () => {
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const { openWizard } = useReservation();
   const navigate = useNavigate();
 
   return (
