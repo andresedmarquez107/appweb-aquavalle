@@ -46,27 +46,22 @@ export const Hero = () => {
 
             <div className="flex flex-wrap gap-4 pt-6">
               <Button 
-                onClick={() => setIsWizardOpen(true)}
+                onClick={openWizard}
                 size="lg" 
                 className="bg-emerald-700 hover:bg-emerald-800 text-white px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 Reservar Ahora
               </Button>
               <Button 
-                onClick={() => {
-                  const element = document.getElementById('servicios');
-                  if (element) element.scrollIntoView({ behavior: 'smooth' });
-                }}
+                onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
                 size="lg" 
                 variant="outline" 
                 className="border-2 border-stone-300 text-stone-700 hover:bg-stone-50 px-8 py-6 text-lg transition-all duration-300"
               >
-                Ver Servicios
+                Ver Más
               </Button>
             </div>
           </div>
-
-          <ReservationWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} />
 
           {/* Right image */}
           <div className="relative">
