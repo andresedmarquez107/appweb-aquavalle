@@ -24,23 +24,16 @@ export const Hero = () => {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
         <div className="space-y-8 animate-fade-in">
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <img 
-              src="https://customer-assets.emergentagent.com/job_valley-cabins/artifacts/5wzmkq3j_Dise%C3%B1o%20sin%20t%C3%ADtulo.png"
-              alt="AquaValle Logo"
-              className="h-32 md:h-40 w-auto drop-shadow-2xl"
-            />
-          </div>
-          
           {/* Welcome text */}
           <div>
-            <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight mb-4">
-              Bienvenido a <br />
-              <span className="text-emerald-400">Cabañas AquaValle</span>
+            <p className="text-2xl md:text-3xl text-emerald-300 font-light mb-6">
+              Bienvenido a
+            </p>
+            <h1 className="font-lobster text-6xl md:text-8xl text-white leading-tight mb-6 drop-shadow-2xl">
+              Cabañas <span className="text-emerald-400">AquaValle</span>
             </h1>
             
-            <p className="text-2xl md:text-3xl text-emerald-200 font-light italic mb-8">
+            <p className="text-2xl md:text-4xl text-emerald-200 font-light italic mb-8">
               "El descanso que mereces"
             </p>
           </div>
