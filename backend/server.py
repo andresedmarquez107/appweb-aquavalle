@@ -7,6 +7,7 @@ from pathlib import Path
 
 # Import routes
 from routes import reservations, rooms
+from database import SupabaseClient
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
