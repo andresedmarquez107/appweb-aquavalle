@@ -14,14 +14,13 @@ export const Navbar = () => {
     <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm shadow-md z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          {/* Logo */}
+          {/* Logo/Brand */}
           <div className="flex-shrink-0">
-            <button onClick={() => navigate('/')} className="flex items-center hover:opacity-80 transition-opacity">
-              <img 
-                src="https://customer-assets.emergentagent.com/job_valley-cabins/artifacts/5wzmkq3j_Dise%C3%B1o%20sin%20t%C3%ADtulo.png"
-                alt="AquaValle Logo"
-                className="h-16 w-auto"
-              />
+            <button 
+              onClick={() => navigate('/')} 
+              className="font-lobster text-3xl md:text-4xl text-emerald-700 hover:text-emerald-800 transition-colors drop-shadow-md"
+            >
+              Cabañas AquaValle
             </button>
           </div>
           
