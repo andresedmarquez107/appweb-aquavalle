@@ -61,7 +61,7 @@ async def admin_login(credentials: AdminLogin):
         admin = result.data[0]
         
         # Verify password
-        if not verify_password(credentials.password, admin['hashed_password']):
+        if not verify_password(credentials.password, admin['password_hash']):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Credenciales incorrectas"
