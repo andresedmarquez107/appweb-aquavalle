@@ -38,11 +38,13 @@ export const ReservationConfirmation = ({ data, onClose }) => {
           notes: null
         };
 
-        console.log('Sending reservation data:', reservationData);
+        console.log('=== SENDING RESERVATION ===');
+        console.log('Data:', JSON.stringify(reservationData, null, 2));
 
         // Create reservation
         const createdReservation = await reservationsAPI.create(reservationData);
-        console.log('Reservation created:', createdReservation);
+        console.log('=== RESERVATION CREATED ===');
+        console.log('Response:', createdReservation);
         setReservation(createdReservation);
         toast.success('¡Reserva creada exitosamente!');
       } catch (err) {
