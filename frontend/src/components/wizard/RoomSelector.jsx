@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
-import { Users, Euro, ArrowLeft } from 'lucide-react';
-import { roomsAPI } from '../../services/api';
+import { Users, Euro, ArrowLeft, Loader2 } from 'lucide-react';
+import { roomsAPI, availabilityAPI } from '../../services/api';
 import { toast } from 'sonner';
+import { format, addMonths } from 'date-fns';
 
 export const RoomSelector = ({ onSelect, onBack }) => {
   const [selectedRooms, setSelectedRooms] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingAvailability, setLoadingAvailability] = useState(false);
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -33,12 +35,41 @@ export const RoomSelector = ({ onSelect, onBack }) => {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (selectedRooms.length === 0) {
       toast.error('Por favor selecciona al menos una habitación');
       return;
     }
-    onSelect(selectedRooms);
+    
+    // Preload unavailable dates before moving to calendar
+    setLoadingAvailability(true);
+    try {
+      const today = new Date();
+      const threeMonthsLater = addMonths(today, 3);
+      const startDate = format(today, 'yyyy-MM-dd');
+      const endDate = format(threeMonthsLater, 'yyyy-MM-dd');
+      
+      // Fetch availability for all selected rooms
+      const availabilityPromises = selectedRooms.map(roomId =>
+        availabilityAPI.getRoomAvailability(roomId, startDate, endDate)
+      );
+      
+      const results = await Promise.all(availabilityPromises);
+      
+      // Collect all unavailable dates
+      const allUnavailable = new Set();
+      results.forEach(result => {
+        result.unavailable_dates.forEach(date => allUnavailable.add(date));
+      });
+      
+      onSelect(selectedRooms, Array.from(allUnavailable));
+    } catch (error) {
+      console.error('Error preloading availability:', error);
+      // Continue anyway, the calendar will load dates itself
+      onSelect(selectedRooms, []);
+    } finally {
+      setLoadingAvailability(false);
+    }
   };
 
   const totalPrice = selectedRooms.reduce((sum, roomId) => {
