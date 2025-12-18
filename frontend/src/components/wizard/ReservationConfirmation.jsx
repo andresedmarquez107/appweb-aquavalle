@@ -1,17 +1,57 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
-import { CheckCircle, Calendar, Users, Home, MessageCircle } from 'lucide-react';
+import { CheckCircle, Calendar, Users, Home, MessageCircle, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { mockRooms, WHATSAPP_NUMBER, FULLDAY_PRICE } from '../../mock';
+import { roomsAPI, reservationsAPI, generateWhatsAppLink } from '../../services/api';
 import { toast } from 'sonner';
 
 export const ReservationConfirmation = ({ data, onClose }) => {
-  const { serviceType, rooms, guests, dateRange, personalData } = data;
+  const { serviceType, rooms: roomIds, guests, dateRange, personalData } = data;
+  const [loading, setLoading] = useState(true);
+  const [reservation, setReservation] = useState(null);
+  const [roomsData, setRoomsData] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    toast.success('¡Reserva confirmada! Ahora serás redirigido a WhatsApp');
+    const createReservation = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch room details
+        const allRooms = await roomsAPI.getAll();
+        const selectedRooms = allRooms.filter(r => roomIds.includes(r.id));
+        setRoomsData(selectedRooms);
+
+        // Prepare reservation data
+        const reservationData = {
+          client_name: personalData.name,
+          client_document: personalData.idDocument,
+          client_email: personalData.email || null,
+          client_phone: personalData.phone,
+          reservation_type: serviceType,
+          check_in_date: format(dateRange.from, 'yyyy-MM-dd'),
+          check_out_date: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null,
+          num_guests: guests,
+          room_ids: serviceType === 'hospedaje' ? roomIds : [],
+          notes: null
+        };
+
+        // Create reservation
+        const createdReservation = await reservationsAPI.create(reservationData);
+        setReservation(createdReservation);
+        toast.success('¡Reserva creada exitosamente!');
+      } catch (err) {
+        console.error('Error creating reservation:', err);
+        setError(err.message);
+        toast.error('Error al crear la reserva. Por favor intenta de nuevo.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    createReservation();
   }, []);
 
   const handleWhatsAppRedirect = () => {
