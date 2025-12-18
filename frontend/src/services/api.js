@@ -104,6 +104,51 @@ export const reservationsAPI = {
   }
 };
 
+// Admin API
+export const adminAPI = {
+  login: async (email, password) => {
+    const response = await axios.post(`${API}/admin/login`, { email, password });
+    return response.data;
+  },
+
+  getStats: async () => {
+    const token = localStorage.getItem('adminToken');
+    const response = await axios.get(`${API}/admin/stats`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+
+  getReservations: async (status, type) => {
+    const token = localStorage.getItem('adminToken');
+    const params = {};
+    if (status) params.status_filter = status;
+    if (type) params.reservation_type = type;
+    
+    const response = await axios.get(`${API}/admin/reservations`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params
+    });
+    return response.data;
+  },
+
+  updateReservation: async (id, data) => {
+    const token = localStorage.getItem('adminToken');
+    const response = await axios.put(`${API}/admin/reservations/${id}`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+
+  cancelReservation: async (id) => {
+    const token = localStorage.getItem('adminToken');
+    const response = await axios.delete(`${API}/admin/reservations/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  }
+};
+
 // WhatsApp Integration
 export const generateWhatsAppLink = (reservationData) => {
   const WHATSAPP_NUMBER = '584247739434';
