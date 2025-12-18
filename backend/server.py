@@ -6,7 +6,7 @@ import logging
 from pathlib import Path
 
 # Import routes
-from routes import reservations, rooms, availability
+from routes import reservations, rooms, availability, admin
 from database import SupabaseClient
 
 ROOT_DIR = Path(__file__).parent
