@@ -75,33 +75,46 @@ export const reservationsAPI = {
 export const generateWhatsAppLink = (reservationData) => {
   const WHATSAPP_NUMBER = '584247739434';
   
-  let message = `¡Hola! Quiero confirmar mi reserva:\n\n`;
-  message += `🎯 *Tipo de Servicio:* ${reservationData.reservation_type === 'fullday' ? 'Full Day' : 'Hospedaje'}\n\n`;
+  let message = `Hola! Quiero confirmar mi reserva:\n\n`;
+  message += `Tipo de Servicio: ${reservationData.reservation_type === 'fullday' ? 'Full Day' : 'Hospedaje'}\n\n`;
   
   if (reservationData.reservation_type === 'hospedaje') {
-    message += `🏠 *Habitaciones:*\n`;
+    message += `Habitaciones:\n`;
     reservationData.rooms.forEach(room => {
       message += `   - ${room}\n`;
     });
     message += `\n`;
   } else {
-    message += `👥 *Personas:* ${reservationData.num_guests}\n`;
-    message += `💰 *Total:* €${reservationData.total_price}\n\n`;
+    message += `Personas: ${reservationData.num_guests}\n`;
+    message += `Total: €${reservationData.total_price}\n\n`;
   }
   
-  message += `📅 *Fecha de entrada:* ${reservationData.check_in_date}\n`;
+  message += `Fecha de entrada: ${reservationData.check_in_date}\n`;
   if (reservationData.check_out_date) {
-    message += `📆 *Fecha de salida:* ${reservationData.check_out_date}\n`;
+    message += `Fecha de salida: ${reservationData.check_out_date}\n`;
   }
   message += `\n`;
   
-  message += `👤 *Datos del Cliente:*\n`;
+  message += `Datos del Cliente:\n`;
   message += `   Nombre: ${reservationData.client_name}\n`;
   message += `   Documento: ${reservationData.client_document}\n`;
-  message += `   Teléfono: ${reservationData.client_phone}\n`;
+  message += `   Telefono: ${reservationData.client_phone}\n`;
   if (reservationData.client_email) {
     message += `   Email: ${reservationData.client_email}\n`;
   }
   
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+};
+
+// Open WhatsApp with error handling
+export const openWhatsApp = (reservationData) => {
+  const link = generateWhatsAppLink(reservationData);
+  
+  // Try to open in new window
+  const newWindow = window.open(link, '_blank', 'noopener,noreferrer');
+  
+  // If popup was blocked, try location.href as fallback
+  if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+    window.location.href = link;
+  }
 };
