@@ -232,17 +232,76 @@ export const ReservationConfirmation = ({ data, onClose }) => {
         </div>
       </Card>
 
-      {/* WhatsApp button */}
-      <Button
-        onClick={handleWhatsAppRedirect}
-        className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-semibold"
-      >
-        <MessageCircle className="mr-2" size={24} />
-        Confirmar por WhatsApp
-      </Button>
+      {/* WhatsApp buttons */}
+      <div className="space-y-3">
+        <Button
+          onClick={handleWhatsAppRedirect}
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-semibold"
+        >
+          <MessageCircle className="mr-2" size={24} />
+          Abrir WhatsApp
+        </Button>
+
+        <Button
+          onClick={() => {
+            const whatsappData = {
+              reservation_type: serviceType,
+              rooms: roomsData.map(r => r.name),
+              num_guests: guests,
+              total_price: reservation.total_price,
+              check_in_date: format(dateRange.from, 'dd/MM/yyyy', { locale: es }),
+              check_out_date: dateRange.to ? format(dateRange.to, 'dd/MM/yyyy', { locale: es }) : null,
+              client_name: personalData.name,
+              client_document: personalData.idDocument,
+              client_phone: personalData.phone,
+              client_email: personalData.email
+            };
+            
+            // Generate message
+            let message = `Hola! Quiero confirmar mi reserva:\n\n`;
+            message += `Tipo de Servicio: ${whatsappData.reservation_type === 'fullday' ? 'Full Day' : 'Hospedaje'}\n\n`;
+            
+            if (whatsappData.reservation_type === 'hospedaje') {
+              message += `Habitaciones:\n`;
+              whatsappData.rooms.forEach(room => {
+                message += `   - ${room}\n`;
+              });
+              message += `\n`;
+            } else {
+              message += `Personas: ${whatsappData.num_guests}\n`;
+              message += `Total: €${whatsappData.total_price}\n\n`;
+            }
+            
+            message += `Fecha de entrada: ${whatsappData.check_in_date}\n`;
+            if (whatsappData.check_out_date) {
+              message += `Fecha de salida: ${whatsappData.check_out_date}\n`;
+            }
+            message += `\n`;
+            
+            message += `Datos del Cliente:\n`;
+            message += `   Nombre: ${whatsappData.client_name}\n`;
+            message += `   Documento: ${whatsappData.client_document}\n`;
+            message += `   Telefono: ${whatsappData.client_phone}\n`;
+            if (whatsappData.client_email) {
+              message += `   Email: ${whatsappData.client_email}\n`;
+            }
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(message).then(() => {
+              toast.success('¡Mensaje copiado! Ahora pégalo en WhatsApp');
+            }).catch(() => {
+              toast.error('No se pudo copiar. Usa el botón de arriba.');
+            });
+          }}
+          variant="outline"
+          className="w-full border-2 border-green-600 text-green-700 hover:bg-green-50 py-6 text-lg font-semibold"
+        >
+          Copiar Mensaje
+        </Button>
+      </div>
 
       <p className="text-center text-sm text-stone-500 mt-4">
-        Serás redirigido a WhatsApp para confirmar tu reserva
+        Si WhatsApp no abre, copia el mensaje y envíalo manualmente al +58 424 773 9434
       </p>
     </div>
   );
