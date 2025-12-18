@@ -7,7 +7,7 @@ const API = `${BACKEND_URL}/api`;
 export const roomsAPI = {
   getAll: async () => {
     try {
-      const response = await axios.get(`${API}/rooms`);
+      const response = await axios.get(`${API}/rooms/`);
       return response.data;
     } catch (error) {
       console.error('Error fetching rooms:', error);
@@ -17,7 +17,7 @@ export const roomsAPI = {
 
   getById: async (id) => {
     try {
-      const response = await axios.get(`${API}/rooms/${id}`);
+      const response = await axios.get(`${API}/rooms/${id}/`);
       return response.data;
     } catch (error) {
       console.error('Error fetching room:', error);
