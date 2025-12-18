@@ -128,11 +128,11 @@ export const ReservationConfirmation = ({ data, onClose }) => {
               <p className="font-semibold text-stone-800 text-lg">
                 {serviceType === 'fullday' ? 'Full Day' : 'Hospedaje'}
               </p>
-              {serviceType === 'hospedaje' && (
+              {serviceType === 'hospedaje' && roomsData.length > 0 && (
                 <div className="mt-2 space-y-1">
-                  {selectedRooms.map(room => (
+                  {roomsData.map(room => (
                     <p key={room.id} className="text-sm text-stone-600">
-                      • Habitación {room.name} - €{room.price}/noche ({room.capacity} personas)
+                      • Habitación {room.name} - €{room.price_per_night}/noche ({room.capacity} personas)
                     </p>
                   ))}
                 </div>
