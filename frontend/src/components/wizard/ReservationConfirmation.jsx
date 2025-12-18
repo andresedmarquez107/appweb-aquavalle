@@ -188,13 +188,13 @@ export const ReservationConfirmation = ({ data, onClose }) => {
           <div className="flex justify-between items-center">
             <div>
               <p className="text-stone-600">Total a pagar</p>
-              {serviceType === 'hospedaje' && (
-                <p className="text-xs text-stone-500">€{totalPrice} × {nights} noche{nights > 1 ? 's' : ''}</p>
+              {serviceType === 'hospedaje' && nights > 1 && (
+                <p className="text-xs text-stone-500">{nights} noche{nights > 1 ? 's' : ''}</p>
               )}
             </div>
             <div className="text-right">
               <p className="text-3xl font-bold text-emerald-700">
-                €{serviceType === 'hospedaje' ? totalPrice * nights : totalPrice}
+                €{reservation.total_price}
               </p>
             </div>
           </div>
