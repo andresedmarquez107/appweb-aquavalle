@@ -174,6 +174,7 @@ export const RoomSelector = ({ onSelect, onBack }) => {
         <Button
           variant="outline"
           onClick={onBack}
+          disabled={loadingAvailability}
           className="flex items-center gap-2"
         >
           <ArrowLeft size={18} />
@@ -182,10 +183,17 @@ export const RoomSelector = ({ onSelect, onBack }) => {
         
         <Button
           onClick={handleContinue}
-          disabled={selectedRooms.length === 0}
+          disabled={selectedRooms.length === 0 || loadingAvailability}
           className="bg-emerald-700 hover:bg-emerald-800 text-white flex-1"
         >
-          Continuar
+          {loadingAvailability ? (
+            <>
+              <Loader2 className="animate-spin mr-2" size={18} />
+              Cargando disponibilidad...
+            </>
+          ) : (
+            'Continuar'
+          )}
         </Button>
       </div>
     </div>
