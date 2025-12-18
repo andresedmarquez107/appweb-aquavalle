@@ -207,14 +207,20 @@ class ReservationService:
             res_check_out = datetime.fromisoformat(res['check_out_date']).date() if res['check_out_date'] else res_check_in
             
             logger.info(f"Existing reservation: {res_check_in} to {res_check_out} (status: {res['status']})")
+            logger.info(f"Checking overlap: new range {check_in} to {check_out}")
             
-            # Check for overlap: There's overlap if ranges intersect
-            # No overlap if: new check_in >= existing check_out OR new check_out <= existing check_in
-            # This allows same-day checkout/checkin
-            has_overlap = not (check_in >= res_check_out or check_out <= res_check_in)
+            # Check for overlap
+            # No overlap if one of these is true:
+            # 1. New check-in is on or after existing check-out (same day checkout/checkin allowed)
+            # 2. New check-out is on or before existing check-in
+            no_overlap = (check_in >= res_check_out) or (check_out <= res_check_in)
             
-            if has_overlap:
-                logger.info(f"Overlap detected!")
+            logger.info(f"  - check_in >= res_check_out: {check_in} >= {res_check_out} = {check_in >= res_check_out}")
+            logger.info(f"  - check_out <= res_check_in: {check_out} <= {res_check_in} = {check_out <= res_check_in}")
+            logger.info(f"  - No overlap: {no_overlap}")
+            
+            if not no_overlap:
+                logger.info(f"❌ Overlap detected! Room not available.")
                 return False
         
         logger.info(f"Room is available!")
