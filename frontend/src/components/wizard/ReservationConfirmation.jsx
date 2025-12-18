@@ -103,65 +103,7 @@ export const ReservationConfirmation = ({ data, onClose }) => {
     return null;
   }
 
-  const handleWhatsAppRedirectOld = () => {
-    let message = `¡Hola! Quiero confirmar mi reserva:\n\n`;
-    
-    // Service type
-    message += `🎯 *Tipo de Servicio:* ${serviceType === 'fullday' ? 'Full Day' : 'Hospedaje'}\n\n`;
-    
-    // Room or guests
-    if (serviceType === 'hospedaje') {
-      const selectedRooms = mockRooms.filter(r => rooms.includes(r.id));
-      message += `🏠 *Habitaciones:*\n`;
-      selectedRooms.forEach(room => {
-        message += `   - ${room.name} (€${room.price}/noche, ${room.capacity} personas)\n`;
-      });
-      const totalPrice = selectedRooms.reduce((sum, room) => sum + room.price, 0);
-      message += `   Total por noche: €${totalPrice}\n\n`;
-    } else {
-      const totalPrice = guests * FULLDAY_PRICE;
-      message += `👥 *Personas:* ${guests}\n`;
-      message += `💰 *Total:* €${totalPrice}\n\n`;
-    }
-    
-    // Dates
-    if (serviceType === 'fullday') {
-      message += `📅 *Fecha:* ${format(dateRange.from, 'dd/MM/yyyy', { locale: es })}\n`;
-      message += `   Horario: 9:00 AM - 7:00 PM\n\n`;
-    } else {
-      const nights = Math.ceil((dateRange.to - dateRange.from) / (1000 * 60 * 60 * 24));
-      message += `📅 *Check-in:* ${format(dateRange.from, 'dd/MM/yyyy', { locale: es })} a las 2:00 PM\n`;
-      message += `📆 *Check-out:* ${format(dateRange.to, 'dd/MM/yyyy', { locale: es })} a las 12:00 PM\n`;
-      message += `   (${nights} noche${nights > 1 ? 's' : ''})\n\n`;
-    }
-    
-    // Personal data
-    message += `👤 *Datos del Cliente:*\n`;
-    message += `   Nombre: ${personalData.name}\n`;
-    message += `   Documento: ${personalData.idDocument}\n`;
-    message += `   Teléfono: ${personalData.phone}\n`;
-    if (personalData.email) {
-      message += `   Email: ${personalData.email}\n`;
-    }
-
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-    
-    // Close modal after a delay
-    setTimeout(() => {
-      onClose();
-    }, 2000);
-  };
-
-  const selectedRooms = serviceType === 'hospedaje' 
-    ? mockRooms.filter(r => rooms.includes(r.id))
-    : [];
-
-  const totalPrice = serviceType === 'hospedaje'
-    ? selectedRooms.reduce((sum, room) => sum + room.price, 0)
-    : guests * FULLDAY_PRICE;
-
-  const nights = serviceType === 'hospedaje'
+  const nights = serviceType === 'hospedaje' && dateRange.to
     ? Math.ceil((dateRange.to - dateRange.from) / (1000 * 60 * 60 * 24))
     : 1;
 
