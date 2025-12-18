@@ -45,7 +45,7 @@ export const availabilityAPI = {
 
   getAllRoomsAvailability: async (startDate, endDate) => {
     try {
-      const response = await axios.get(`${API}/availability/rooms/`, {
+      const response = await axios.get(`${API}/availability/rooms`, {
         params: {
           start_date: startDate,
           end_date: endDate
