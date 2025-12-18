@@ -33,7 +33,7 @@ export const ReservationConfirmation = ({ data, onClose }) => {
           reservation_type: serviceType,
           check_in_date: format(dateRange.from, 'yyyy-MM-dd'),
           check_out_date: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null,
-          num_guests: guests,
+          num_guests: parseInt(guests, 10),
           room_ids: serviceType === 'hospedaje' ? roomIds : [],
           notes: null
         };
