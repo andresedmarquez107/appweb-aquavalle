@@ -9,6 +9,7 @@ import { ReservationConfirmation } from './wizard/ReservationConfirmation';
 
 export const ReservationWizard = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
+  const [unavailableDates, setUnavailableDates] = useState([]);
   const [reservationData, setReservationData] = useState({
     serviceType: null,
     rooms: [],
@@ -27,8 +28,9 @@ export const ReservationWizard = ({ isOpen, onClose }) => {
     setStep(2);
   };
 
-  const handleRoomSelect = (rooms) => {
+  const handleRoomSelect = (rooms, preloadedUnavailableDates = []) => {
     setReservationData({ ...reservationData, rooms });
+    setUnavailableDates(preloadedUnavailableDates);
     setStep(3);
   };
 
