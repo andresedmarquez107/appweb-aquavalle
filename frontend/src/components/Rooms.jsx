@@ -2,9 +2,30 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Badge } from './ui/badge';
 import { Users, Euro, Wifi, Tv, Flame, Droplets } from 'lucide-react';
-import { mockRooms } from '../mock';
+import { useRooms } from '../hooks/useRooms';
 
 export const Rooms = () => {
+  const { rooms, loading, error } = useRooms();
+  
+  if (loading) {
+    return (
+      <section id="habitaciones" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-stone-600">Cargando habitaciones...</p>
+        </div>
+      </section>
+    );
+  }
+  
+  if (error) {
+    return (
+      <section id="habitaciones" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-red-600">Error al cargar habitaciones</p>
+        </div>
+      </section>
+    );
+  }
   const iconMap = {
     'WiFi': <Wifi size={18} />,
     'TV': <Tv size={18} />,
