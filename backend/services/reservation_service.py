@@ -195,6 +195,9 @@ class ReservationService:
             'reservations!inner(check_in_date, check_out_date, status)'
         ).eq('room_id', room_id).execute()
         
+        logger.info(f"Checking availability for room {room_id} from {check_in} to {check_out}")
+        logger.info(f"Found {len(response.data)} reservation records")
+        
         for rr in response.data:
             res = rr['reservations']
             if res['status'] not in ['confirmed', 'pending']:
@@ -203,8 +206,16 @@ class ReservationService:
             res_check_in = datetime.fromisoformat(res['check_in_date']).date()
             res_check_out = datetime.fromisoformat(res['check_out_date']).date() if res['check_out_date'] else res_check_in
             
-            # Check for overlap
-            if not (check_out <= res_check_in or check_in >= res_check_out):
+            logger.info(f"Existing reservation: {res_check_in} to {res_check_out} (status: {res['status']})")
+            
+            # Check for overlap: There's overlap if ranges intersect
+            # No overlap if: new check_in >= existing check_out OR new check_out <= existing check_in
+            # This allows same-day checkout/checkin
+            has_overlap = not (check_in >= res_check_out or check_out <= res_check_in)
+            
+            if has_overlap:
+                logger.info(f"Overlap detected!")
                 return False
         
+        logger.info(f"Room is available!")
         return True
