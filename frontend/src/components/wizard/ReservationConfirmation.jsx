@@ -95,10 +95,19 @@ export const ReservationConfirmation = ({ data, onClose }) => {
   if (error) {
     return (
       <div className="py-12 text-center">
-        <div className="text-red-600 mb-4">Error al crear la reserva</div>
-        <p className="text-stone-600 mb-6">{error}</p>
+        <div className="text-red-600 mb-4 text-xl font-semibold">Error al crear la reserva</div>
+        <div className="text-stone-600 mb-6 max-w-md mx-auto">
+          {typeof error === 'string' ? (
+            <p>{error}</p>
+          ) : (
+            <div className="text-left bg-red-50 p-4 rounded-lg">
+              <p className="font-semibold mb-2">Detalles del error:</p>
+              <pre className="text-xs overflow-auto">{JSON.stringify(error, null, 2)}</pre>
+            </div>
+          )}
+        </div>
         <Button onClick={onClose} variant="outline">
-          Cerrar
+          Cerrar e Intentar de Nuevo
         </Button>
       </div>
     );
