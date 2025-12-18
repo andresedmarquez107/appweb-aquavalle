@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { CheckCircle, Calendar, Users, Home, MessageCircle, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { roomsAPI, reservationsAPI, generateWhatsAppLink } from '../../services/api';
+import { roomsAPI, reservationsAPI, openWhatsApp } from '../../services/api';
 import { toast } from 'sonner';
 
 export const ReservationConfirmation = ({ data, onClose }) => {
