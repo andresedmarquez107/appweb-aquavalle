@@ -6,7 +6,6 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { roomsAPI, reservationsAPI, openWhatsApp } from '../../services/api';
 import { toast } from 'sonner';
-import { toast } from 'sonner';
 
 export const ReservationConfirmation = ({ data, onClose }) => {
   const { serviceType, rooms: roomIds, guests, dateRange, personalData } = data;
