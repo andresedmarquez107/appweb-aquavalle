@@ -91,9 +91,10 @@ class ReservationCreate(BaseModel):
     @validator('room_ids')
     def validate_rooms(cls, v, values):
         if 'reservation_type' in values:
-            if values['reservation_type'] == ReservationType.HOSPEDAJE and not v:
-                raise ValueError('At least one room is required for hospedaje')
-        return v
+            if values['reservation_type'] == ReservationType.HOSPEDAJE:
+                if not v or len(v) == 0:
+                    raise ValueError('At least one room is required for hospedaje')
+        return v if v else []
 
 class Reservation(BaseModel):
     id: str
