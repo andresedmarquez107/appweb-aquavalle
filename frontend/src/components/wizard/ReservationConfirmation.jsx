@@ -55,6 +55,55 @@ export const ReservationConfirmation = ({ data, onClose }) => {
   }, []);
 
   const handleWhatsAppRedirect = () => {
+    if (!reservation) return;
+    
+    const whatsappData = {
+      reservation_type: serviceType,
+      rooms: roomsData.map(r => r.name),
+      num_guests: guests,
+      total_price: reservation.total_price,
+      check_in_date: format(dateRange.from, 'dd/MM/yyyy', { locale: es }),
+      check_out_date: dateRange.to ? format(dateRange.to, 'dd/MM/yyyy', { locale: es }) : null,
+      client_name: personalData.name,
+      client_document: personalData.idDocument,
+      client_phone: personalData.phone,
+      client_email: personalData.email
+    };
+    
+    const whatsappUrl = generateWhatsAppLink(whatsappData);
+    window.open(whatsappUrl, '_blank');
+    
+    setTimeout(() => {
+      onClose();
+    }, 2000);
+  };
+
+  if (loading) {
+    return (
+      <div className="py-12 text-center">
+        <Loader2 className="animate-spin mx-auto mb-4 text-emerald-600" size={48} />
+        <p className="text-stone-600">Creando tu reserva...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="py-12 text-center">
+        <div className="text-red-600 mb-4">Error al crear la reserva</div>
+        <p className="text-stone-600 mb-6">{error}</p>
+        <Button onClick={onClose} variant="outline">
+          Cerrar
+        </Button>
+      </div>
+    );
+  }
+
+  if (!reservation) {
+    return null;
+  }
+
+  const handleWhatsAppRedirectOld = () => {
     let message = `¡Hola! Quiero confirmar mi reserva:\n\n`;
     
     // Service type
