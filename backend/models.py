@@ -75,13 +75,14 @@ class ReservationCreate(BaseModel):
             
         if values['reservation_type'] == ReservationType.HOSPEDAJE:
             if not v:
-                raise ValueError('check_out_date is required for hospedaje')
-            if 'check_in_date' in values and v <= values['check_in_date']:
-                raise ValueError('check_out_date must be after check_in_date')
-        elif values['reservation_type'] == ReservationType.FULLDAY:
-            # For fullday, check_out_date should be None
-            pass
-            
+                raise ValueError('check_out_date es requerido para hospedaje')
+            if 'check_in_date' in values:
+                # Convert both to dates for comparison
+                check_in = values['check_in_date']
+                check_out = v
+                if check_out <= check_in:
+                    raise ValueError('La fecha de salida debe ser posterior a la fecha de entrada')
+        
         return v
 
     @validator('num_guests')
