@@ -42,21 +42,29 @@ export const RoomSelector = ({ onSelect, onBack }) => {
   };
 
   const totalPrice = selectedRooms.reduce((sum, roomId) => {
-    const room = mockRooms.find(r => r.id === roomId);
-    return sum + (room?.price || 0);
+    const room = rooms.find(r => r.id === roomId);
+    return sum + (room?.price_per_night || 0);
   }, 0);
 
   const totalCapacity = selectedRooms.reduce((sum, roomId) => {
-    const room = mockRooms.find(r => r.id === roomId);
+    const room = rooms.find(r => r.id === roomId);
     return sum + (room?.capacity || 0);
   }, 0);
+
+  if (loading) {
+    return (
+      <div className="py-8 text-center">
+        <p className="text-stone-600">Cargando habitaciones...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="py-4">
       <p className="text-stone-600 mb-6 text-center">Puedes seleccionar una o ambas habitaciones</p>
       
       <div className="grid md:grid-cols-2 gap-6 mb-6">
-        {mockRooms.map((room) => {
+        {rooms.map((room) => {
           const isSelected = selectedRooms.includes(room.id);
           
           return (
