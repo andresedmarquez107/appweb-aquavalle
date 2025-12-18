@@ -30,7 +30,7 @@ export const roomsAPI = {
 export const reservationsAPI = {
   create: async (reservationData) => {
     try {
-      const response = await axios.post(`${API}/reservations`, reservationData);
+      const response = await axios.post(`${API}/reservations/`, reservationData);
       return response.data;
     } catch (error) {
       console.error('Error creating reservation:', error);
@@ -40,7 +40,7 @@ export const reservationsAPI = {
 
   getAll: async (skip = 0, limit = 100) => {
     try {
-      const response = await axios.get(`${API}/reservations`, {
+      const response = await axios.get(`${API}/reservations/`, {
         params: { skip, limit }
       });
       return response.data;
@@ -52,7 +52,7 @@ export const reservationsAPI = {
 
   getById: async (id) => {
     try {
-      const response = await axios.get(`${API}/reservations/${id}`);
+      const response = await axios.get(`${API}/reservations/${id}/`);
       return response.data;
     } catch (error) {
       console.error('Error fetching reservation:', error);
@@ -62,7 +62,7 @@ export const reservationsAPI = {
 
   checkAvailability: async (availabilityData) => {
     try {
-      const response = await axios.post(`${API}/reservations/check-availability`, availabilityData);
+      const response = await axios.post(`${API}/reservations/check-availability/`, availabilityData);
       return response.data;
     } catch (error) {
       console.error('Error checking availability:', error);
