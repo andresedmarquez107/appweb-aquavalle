@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { CheckCircle, Calendar, Users, Home, MessageCircle, Loader2 } from 'lucide-react';
@@ -13,8 +13,17 @@ export const ReservationConfirmation = ({ data, onClose }) => {
   const [reservation, setReservation] = useState(null);
   const [roomsData, setRoomsData] = useState([]);
   const [error, setError] = useState(null);
+  
+  // Prevent double execution in StrictMode
+  const hasCreatedReservation = useRef(false);
 
   useEffect(() => {
+    // Skip if already created (StrictMode double-run protection)
+    if (hasCreatedReservation.current) {
+      return;
+    }
+    hasCreatedReservation.current = true;
+    
     const createReservation = async () => {
       try {
         setLoading(true);
