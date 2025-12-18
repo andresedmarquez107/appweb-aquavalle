@@ -1,13 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Users, Euro, ArrowLeft } from 'lucide-react';
-import { mockRooms } from '../../mock';
+import { roomsAPI } from '../../services/api';
 import { toast } from 'sonner';
 
 export const RoomSelector = ({ onSelect, onBack }) => {
   const [selectedRooms, setSelectedRooms] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const data = await roomsAPI.getAll();
+        setRooms(data);
+      } catch (error) {
+        toast.error('Error al cargar habitaciones');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRooms();
+  }, []);
 
   const toggleRoom = (roomId) => {
     if (selectedRooms.includes(roomId)) {
