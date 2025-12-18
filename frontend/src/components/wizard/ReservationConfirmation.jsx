@@ -48,7 +48,23 @@ export const ReservationConfirmation = ({ data, onClose }) => {
       } catch (err) {
         console.error('Error creating reservation:', err);
         console.error('Error response:', err.response?.data);
-        const errorMessage = err.response?.data?.detail || err.message || 'Error desconocido';
+        
+        // Extract error message
+        let errorMessage = 'Error desconocido';
+        if (err.response?.data) {
+          const data = err.response.data;
+          if (typeof data.detail === 'string') {
+            errorMessage = data.detail;
+          } else if (Array.isArray(data.detail)) {
+            // Validation errors array
+            errorMessage = data.detail.map(e => e.msg || JSON.stringify(e)).join(', ');
+          } else if (data.detail) {
+            errorMessage = JSON.stringify(data.detail);
+          }
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+        
         setError(errorMessage);
         toast.error(`Error: ${errorMessage}`);
       } finally {
