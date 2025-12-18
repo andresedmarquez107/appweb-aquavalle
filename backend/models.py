@@ -70,15 +70,18 @@ class ReservationCreate(BaseModel):
 
     @validator('check_out_date')
     def validate_checkout(cls, v, values):
-        if 'reservation_type' in values:
-            if values['reservation_type'] == ReservationType.HOSPEDAJE:
-                if not v:
-                    raise ValueError('check_out_date is required for hospedaje')
-                if 'check_in_date' in values and v <= values['check_in_date']:
-                    raise ValueError('check_out_date must be after check_in_date')
-            elif values['reservation_type'] == ReservationType.FULLDAY:
-                if v and v != values.get('check_in_date'):
-                    raise ValueError('check_out_date must be same as check_in_date for fullday')
+        if 'reservation_type' not in values:
+            return v
+            
+        if values['reservation_type'] == ReservationType.HOSPEDAJE:
+            if not v:
+                raise ValueError('check_out_date is required for hospedaje')
+            if 'check_in_date' in values and v <= values['check_in_date']:
+                raise ValueError('check_out_date must be after check_in_date')
+        elif values['reservation_type'] == ReservationType.FULLDAY:
+            # For fullday, check_out_date should be None
+            pass
+            
         return v
 
     @validator('num_guests')
