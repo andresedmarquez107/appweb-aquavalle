@@ -11,9 +11,10 @@ router = APIRouter(prefix="/reservations", tags=["reservations"])
 async def create_reservation(reservation: ReservationCreate):
     """Create a new reservation"""
     try:
+        logger.info(f"Received reservation request: {reservation.dict()}")
         return await ReservationService.create_reservation(reservation)
     except Exception as e:
-        logger.error(f"Error creating reservation: {str(e)}")
+        logger.error(f"Error creating reservation: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
