@@ -110,6 +110,7 @@ export const ReservationWizard = ({ isOpen, onClose }) => {
             <DateRangeSelector 
               serviceType={reservationData.serviceType}
               roomIds={reservationData.rooms}
+              preloadedUnavailableDates={unavailableDates}
               onSelect={handleDateSelect} 
               onBack={handleBack} 
             />
