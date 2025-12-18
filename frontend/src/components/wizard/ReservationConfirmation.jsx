@@ -47,8 +47,10 @@ export const ReservationConfirmation = ({ data, onClose }) => {
         toast.success('¡Reserva creada exitosamente!');
       } catch (err) {
         console.error('Error creating reservation:', err);
-        setError(err.message);
-        toast.error('Error al crear la reserva. Por favor intenta de nuevo.');
+        console.error('Error response:', err.response?.data);
+        const errorMessage = err.response?.data?.detail || err.message || 'Error desconocido';
+        setError(errorMessage);
+        toast.error(`Error: ${errorMessage}`);
       } finally {
         setLoading(false);
       }
