@@ -101,7 +101,9 @@ export const DateRangeSelector = ({ serviceType, onSelect, onBack, roomIds }) =>
         <p className="text-stone-600">
           {serviceType === 'fullday'
             ? 'Elige un día para disfrutar del Full Day'
-            : 'Elige las fechas de entrada y salida'
+            : loading 
+              ? 'Cargando disponibilidad...'
+              : 'Fechas en gris no están disponibles'
           }
         </p>
       </div>
