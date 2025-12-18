@@ -101,3 +101,97 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Sistema de reservas para Cabañas Aquavalle - verificar que la lógica de disponibilidad de fechas funciona correctamente para hospedaje"
+
+backend:
+  - task: "Room availability check for hospedaje"
+    implemented: true
+    working: true
+    file: "backend/services/reservation_service.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Backend API tested via curl - reservations for 2025 created successfully when 2026 reservation exists. Adjacent dates also work correctly."
+
+  - task: "Create hospedaje reservation"
+    implemented: true
+    working: true
+    file: "backend/routes/reservations.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "POST /api/reservations/ working - tested creating reservations for different years/dates"
+
+  - task: "Get all reservations"
+    implemented: true
+    working: true
+    file: "backend/routes/reservations.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "GET /api/reservations/ returns all reservations correctly"
+
+  - task: "Get rooms"
+    implemented: true
+    working: true
+    file: "backend/routes/rooms.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "GET /api/rooms/ returns rooms correctly"
+
+frontend:
+  - task: "Reservation wizard - full flow hospedaje"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/wizard/"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Need to test full UI flow for hospedaje reservation"
+
+  - task: "Calendar shows unavailable dates"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/wizard/DateRangeSelector.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Calendar should disable dates that are already booked"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Reservation wizard - full flow hospedaje"
+    - "Calendar shows unavailable dates"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Backend availability logic verified working via curl tests. Need frontend testing agent to verify: 1) Full hospedaje reservation flow works end-to-end 2) Calendar correctly disables dates for rooms that have existing reservations (D'Jesus room has reservations for 2025-01-17, 2025-01-18, 2026-01-16). Test with room Pacho which has NO reservations."
