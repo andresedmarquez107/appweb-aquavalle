@@ -102,7 +102,7 @@ export const RoomSelector = ({ onSelect, onBack }) => {
                 <div className="absolute bottom-4 left-4">
                   <div className="bg-amber-600 text-white px-4 py-2 rounded-full font-bold flex items-center gap-2">
                     <Euro size={18} />
-                    <span>{room.price}/noche</span>
+                    <span>{room.price_per_night}/noche</span>
                   </div>
                 </div>
               </div>
