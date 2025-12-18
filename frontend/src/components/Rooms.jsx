@@ -44,7 +44,7 @@ export const Rooms = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
-          {mockRooms.map((room, index) => (
+          {rooms.map((room, index) => (
             <Card key={room.id} className="overflow-hidden border-2 border-stone-200 hover:border-emerald-500 transition-all duration-300 hover:shadow-xl">
               <div className="relative h-64 overflow-hidden">
                 <img 
