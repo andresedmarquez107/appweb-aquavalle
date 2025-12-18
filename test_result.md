@@ -186,6 +186,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "Backend availability API correctly returns unavailable dates for room D'Jesus (2025-01-17, 2025-01-18). DateRangeSelector component properly fetches availability data and should disable unavailable dates in calendar. Integration between frontend and backend availability system is working correctly."
+      - working: true
+        agent: "testing"
+        comment: "IMPROVED LOADING FLOW VERIFIED: Calendar loading improvements working perfectly. Availability data is preloaded in RoomSelector (lines 44-73), loading spinner appears with 'Cargando disponibilidad...' text, and calendar displays immediately with preloaded unavailable dates. Backend API returns correct unavailable dates (2026-01-16, 2026-01-22) for current date range. Calendar shows proper unavailable dates message and functions correctly. The UX enhancement successfully eliminates loading delays on the calendar page itself."
 
 metadata:
   created_by: "main_agent"
