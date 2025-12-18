@@ -91,12 +91,13 @@ export const ReservationConfirmation = ({ data, onClose }) => {
       client_email: personalData.email
     };
     
-    const whatsappUrl = generateWhatsAppLink(whatsappData);
-    window.open(whatsappUrl, '_blank');
+    // Use new function with fallback
+    openWhatsApp(whatsappData);
     
+    // Close modal after a short delay
     setTimeout(() => {
       onClose();
-    }, 2000);
+    }, 1500);
   };
 
   if (loading) {
