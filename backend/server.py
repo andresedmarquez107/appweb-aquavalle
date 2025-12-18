@@ -35,6 +35,7 @@ async def root():
 api_router.include_router(reservations.router)
 api_router.include_router(rooms.router)
 api_router.include_router(availability.router)
+api_router.include_router(admin.router)
 
 # Include the router in the main app
 app.include_router(api_router)
