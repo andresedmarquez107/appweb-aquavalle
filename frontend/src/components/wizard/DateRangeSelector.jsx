@@ -1,14 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Calendar } from '../ui/calendar';
 import { ArrowLeft, Calendar as CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, addMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { availabilityAPI } from '../../services/api';
 
-export const DateRangeSelector = ({ serviceType, onSelect, onBack }) => {
+export const DateRangeSelector = ({ serviceType, onSelect, onBack, roomIds }) => {
   const [dateRange, setDateRange] = useState({ from: undefined, to: undefined });
+  const [unavailableDates, setUnavailableDates] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Load unavailable dates for hospedaje
+  useEffect(() => {
+    if (serviceType === 'hospedaje' && roomIds && roomIds.length > 0) {
+      const fetchAvailability = async () => {
+        try {
+          setLoading(true);
+          const today = new Date();
+          const threeMonthsLater = addMonths(today, 3);
+          
+          const startDate = format(today, 'yyyy-MM-dd');
+          const endDate = format(threeMonthsLater, 'yyyy-MM-dd');
+          
+          // Get availability for selected rooms
+          const availabilityPromises = roomIds.map(roomId =>
+            availabilityAPI.getRoomAvailability(roomId, startDate, endDate)
+          );
+          
+          const results = await Promise.all(availabilityPromises);
+          
+          // Collect all unavailable dates
+          const allUnavailable = new Set();
+          results.forEach(result => {
+            result.unavailable_dates.forEach(date => allUnavailable.add(date));
+          });
+          
+          setUnavailableDates(Array.from(allUnavailable));
+        } catch (error) {
+          console.error('Error loading availability:', error);
+          toast.error('No se pudo cargar la disponibilidad');
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchAvailability();
+    }
+  }, [serviceType, roomIds]);
 
   const handleContinue = () => {
     if (!dateRange.from) {
