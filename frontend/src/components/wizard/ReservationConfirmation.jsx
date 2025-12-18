@@ -48,8 +48,10 @@ export const ReservationConfirmation = ({ data, onClose }) => {
         setReservation(createdReservation);
         toast.success('¡Reserva creada exitosamente!');
       } catch (err) {
-        console.error('Error creating reservation:', err);
-        console.error('Error response:', err.response?.data);
+        console.error('=== ERROR CREATING RESERVATION ===');
+        console.error('Full error:', err);
+        console.error('Error response:', err.response);
+        console.error('Error data:', err.response?.data);
         
         // Extract error message
         let errorMessage = 'Error desconocido';
@@ -57,9 +59,20 @@ export const ReservationConfirmation = ({ data, onClose }) => {
           const data = err.response.data;
           if (typeof data.detail === 'string') {
             errorMessage = data.detail;
+            
+            // Translate common errors
+            if (errorMessage.includes('Room not available')) {
+              errorMessage = 'La habitación ya está reservada para estas fechas. Por favor selecciona otras fechas.';
+            } else if (errorMessage.includes('capacity exceeded')) {
+              errorMessage = 'Capacidad máxima excedida para esta fecha.';
+            }
           } else if (Array.isArray(data.detail)) {
             // Validation errors array
-            errorMessage = data.detail.map(e => e.msg || JSON.stringify(e)).join(', ');
+            errorMessage = data.detail.map(e => {
+              const field = e.loc?.[e.loc.length - 1] || 'campo';
+              const msg = e.msg || 'valor inválido';
+              return `${field}: ${msg}`;
+            }).join(', ');
           } else if (data.detail) {
             errorMessage = JSON.stringify(data.detail);
           }
@@ -68,7 +81,7 @@ export const ReservationConfirmation = ({ data, onClose }) => {
         }
         
         setError(errorMessage);
-        toast.error(`Error: ${errorMessage}`);
+        toast.error(`Error: ${errorMessage}`, { duration: 5000 });
       } finally {
         setLoading(false);
       }
