@@ -24,6 +24,12 @@ export const ReservationConfirmation = ({ data, onClose }) => {
         const selectedRooms = allRooms.filter(r => roomIds.includes(r.id));
         setRoomsData(selectedRooms);
 
+        // Calculate num_guests for hospedaje (sum of room capacities)
+        let numGuests = parseInt(guests, 10);
+        if (serviceType === 'hospedaje') {
+          numGuests = selectedRooms.reduce((sum, room) => sum + room.capacity, 0);
+        }
+
         // Prepare reservation data
         const reservationData = {
           client_name: personalData.name,
@@ -33,7 +39,7 @@ export const ReservationConfirmation = ({ data, onClose }) => {
           reservation_type: serviceType,
           check_in_date: format(dateRange.from, 'yyyy-MM-dd'),
           check_out_date: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null,
-          num_guests: parseInt(guests, 10),
+          num_guests: numGuests,
           room_ids: serviceType === 'hospedaje' ? roomIds : [],
           notes: null
         };
