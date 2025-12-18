@@ -168,6 +168,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "Frontend loads correctly with reservation wizard. Homepage displays properly with 'Reservar Ahora' buttons visible. Backend API integration working - rooms API returns correct data (Pacho and D'Jesus rooms). Availability API correctly shows unavailable dates for D'Jesus room (2025-01-17, 2025-01-18). UI components are properly implemented using shadcn/ui. Manual testing shows wizard opens and flows through steps correctly."
+      - working: true
+        agent: "testing"
+        comment: "DUPLICATE TOAST BUG FIX VERIFIED: Comprehensive Playwright test confirmed the useRef guard fix is working. Only ONE API call made (no duplicates), only success toast appeared, no error messages, confirmation screen works properly. The React StrictMode double-execution issue has been resolved. Minor: Room selection UI needs improvement for hospedaje flow, but core reservation functionality works correctly."
 
   - task: "Calendar shows unavailable dates"
     implemented: true
