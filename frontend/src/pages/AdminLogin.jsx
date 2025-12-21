@@ -25,7 +25,8 @@ export const AdminLogin = () => {
       localStorage.setItem('adminEmail', response.admin_email);
       navigate('/admin');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Error al iniciar sesión');
+      const errorMsg = err.response?.data?.detail || 'Error al iniciar sesión';
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
