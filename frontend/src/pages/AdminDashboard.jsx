@@ -10,7 +10,7 @@ import { Textarea } from '../components/ui/textarea';
 import { toast } from 'sonner';
 import {
   Calendar, Users, Home, DollarSign, Clock, LogOut, RefreshCw,
-  CheckCircle, XCircle, AlertCircle, Edit, Trash2, Loader2, Phone, Mail
+  CheckCircle, XCircle, AlertCircle, Edit, Trash2, Loader2, Phone, Mail, Filter
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
 
@@ -21,11 +21,31 @@ export const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [monthFilter, setMonthFilter] = useState('all');
+  const [yearFilter, setYearFilter] = useState('all');
   const [editingReservation, setEditingReservation] = useState(null);
   const [editData, setEditData] = useState({});
   const [saving, setSaving] = useState(false);
 
   const adminEmail = localStorage.getItem('adminEmail');
+  
+  const months = [
+    { value: '1', label: 'Enero' },
+    { value: '2', label: 'Febrero' },
+    { value: '3', label: 'Marzo' },
+    { value: '4', label: 'Abril' },
+    { value: '5', label: 'Mayo' },
+    { value: '6', label: 'Junio' },
+    { value: '7', label: 'Julio' },
+    { value: '8', label: 'Agosto' },
+    { value: '9', label: 'Septiembre' },
+    { value: '10', label: 'Octubre' },
+    { value: '11', label: 'Noviembre' },
+    { value: '12', label: 'Diciembre' }
+  ];
+  
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -36,12 +56,22 @@ export const AdminDashboard = () => {
     loadData();
   }, [navigate]);
 
+  useEffect(() => {
+    if (localStorage.getItem('adminToken')) {
+      loadData();
+    }
+  }, [monthFilter, yearFilter]);
+
   const loadData = async () => {
     setLoading(true);
     try {
+      const params = {};
+      if (monthFilter !== 'all') params.month = parseInt(monthFilter);
+      if (yearFilter !== 'all') params.year = parseInt(yearFilter);
+      
       const [statsData, reservationsData] = await Promise.all([
-        adminAPI.getStats(),
-        adminAPI.getReservations()
+        adminAPI.getStats(params.month, params.year),
+        adminAPI.getReservations(null, null, params.month, params.year)
       ]);
       setStats(statsData);
       setReservations(reservationsData);
@@ -67,7 +97,10 @@ export const AdminDashboard = () => {
     setEditingReservation(reservation);
     setEditData({
       status: reservation.status,
-      notes: reservation.notes || ''
+      notes: reservation.notes || '',
+      num_guests: reservation.num_guests,
+      client_name: reservation.client?.name || '',
+      client_phone: reservation.client?.phone || ''
     });
   };
 
@@ -79,7 +112,7 @@ export const AdminDashboard = () => {
       setEditingReservation(null);
       loadData();
     } catch (err) {
-      toast.error('Error actualizando reservación');
+      toast.error(err.response?.data?.detail || 'Error actualizando reservación');
     } finally {
       setSaving(false);
     }
@@ -92,7 +125,7 @@ export const AdminDashboard = () => {
       toast.success('Reservación cancelada');
       loadData();
     } catch (err) {
-      toast.error('Error cancelando reservación');
+      toast.error(err.response?.data?.detail || 'Error cancelando reservación');
     }
   };
 
@@ -122,7 +155,14 @@ export const AdminDashboard = () => {
     );
   };
 
-  if (loading) {
+  const clearFilters = () => {
+    setMonthFilter('all');
+    setYearFilter('all');
+    setStatusFilter('all');
+    setTypeFilter('all');
+  };
+
+  if (loading && !stats) {
     return (
       <div className="min-h-screen bg-stone-100 flex items-center justify-center">
         <Loader2 className="animate-spin text-emerald-700" size={48} />
@@ -141,8 +181,8 @@ export const AdminDashboard = () => {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-stone-600 text-sm">{adminEmail}</span>
-            <Button variant="outline" size="sm" onClick={loadData}>
-              <RefreshCw size={16} className="mr-1" /> Actualizar
+            <Button variant="outline" size="sm" onClick={loadData} disabled={loading}>
+              <RefreshCw size={16} className={`mr-1 ${loading ? 'animate-spin' : ''}`} /> Actualizar
             </Button>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut size={16} className="mr-1" /> Salir
@@ -152,6 +192,60 @@ export const AdminDashboard = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Month/Year Filter */}
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="flex flex-wrap items-end gap-4">
+              <div className="flex items-center gap-2">
+                <Filter size={18} className="text-stone-500" />
+                <span className="font-medium text-stone-700">Filtrar por período:</span>
+              </div>
+              
+              <div className="w-40">
+                <Label className="mb-1 block text-xs">Mes</Label>
+                <Select value={monthFilter} onValueChange={setMonthFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los meses</SelectItem>
+                    {months.map(m => (
+                      <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="w-32">
+                <Label className="mb-1 block text-xs">Año</Label>
+                <Select value={yearFilter} onValueChange={setYearFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    {years.map(y => (
+                      <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {(monthFilter !== 'all' || yearFilter !== 'all') && (
+                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                  Limpiar filtros
+                </Button>
+              )}
+              
+              {stats?.month_label && (
+                <span className="text-emerald-700 font-medium ml-auto">
+                  Mostrando: {stats.month_label}
+                </span>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Stats Cards */}
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -195,8 +289,8 @@ export const AdminDashboard = () => {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-stone-600">Ingresos</p>
-                    <p className="text-3xl font-bold text-stone-800">€{stats.total_revenue?.toFixed(0)}</p>
+                    <p className="text-sm text-stone-600">Ingresos (Confirmadas)</p>
+                    <p className="text-3xl font-bold text-stone-800">€{stats.total_revenue?.toFixed(2)}</p>
                   </div>
                   <DollarSign className="text-emerald-600" size={32} />
                 </div>
@@ -205,7 +299,7 @@ export const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Filters */}
+        {/* Status/Type Filters */}
         <Card className="mb-6">
           <CardContent className="pt-6">
             <div className="flex flex-wrap gap-4">
@@ -220,6 +314,7 @@ export const AdminDashboard = () => {
                     <SelectItem value="pending">Pendientes</SelectItem>
                     <SelectItem value="confirmed">Confirmadas</SelectItem>
                     <SelectItem value="cancelled">Canceladas</SelectItem>
+                    <SelectItem value="completed">Completadas</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -340,7 +435,7 @@ export const AdminDashboard = () => {
 
       {/* Edit Dialog */}
       <Dialog open={!!editingReservation} onOpenChange={() => setEditingReservation(null)}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Editar Reservación</DialogTitle>
           </DialogHeader>
@@ -348,11 +443,42 @@ export const AdminDashboard = () => {
           {editingReservation && (
             <div className="space-y-4">
               <div className="bg-stone-50 p-4 rounded-lg">
-                <p className="font-medium">{editingReservation.client?.name}</p>
                 <p className="text-sm text-stone-600">
                   {editingReservation.check_in_date} 
                   {editingReservation.check_out_date && ` - ${editingReservation.check_out_date}`}
                 </p>
+                <p className="text-sm text-stone-500">
+                  {editingReservation.reservation_type === 'hospedaje' ? 'Hospedaje' : 'Full Day'}
+                  {editingReservation.rooms?.length > 0 && ` - ${editingReservation.rooms.join(', ')}`}
+                </p>
+              </div>
+              
+              <div>
+                <Label>Nombre del Cliente</Label>
+                <Input
+                  value={editData.client_name}
+                  onChange={(e) => setEditData({...editData, client_name: e.target.value})}
+                  placeholder="Nombre completo"
+                />
+              </div>
+              
+              <div>
+                <Label>Teléfono</Label>
+                <Input
+                  value={editData.client_phone}
+                  onChange={(e) => setEditData({...editData, client_phone: e.target.value})}
+                  placeholder="+58..."
+                />
+              </div>
+              
+              <div>
+                <Label>Número de Personas</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={editData.num_guests}
+                  onChange={(e) => setEditData({...editData, num_guests: parseInt(e.target.value) || 1})}
+                />
               </div>
               
               <div>
