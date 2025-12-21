@@ -244,7 +244,7 @@ async def update_reservation(
     db = get_db()
     
     try:
-        # First, get the reservation to find client_id
+        # First, get the reservation to find client_id and type
         reservation = db.table('reservations').select('*, clients(*)').eq('id', reservation_id).execute()
         
         if not reservation.data:
@@ -255,6 +255,7 @@ async def update_reservation(
         
         res_data = reservation.data[0]
         client_id = res_data.get('client_id')
+        reservation_type = res_data.get('reservation_type')
         
         # Build update dict for reservation
         update_dict = {}
@@ -264,10 +265,15 @@ async def update_reservation(
             update_dict['check_in_date'] = update_data.check_in_date
         if update_data.check_out_date is not None:
             update_dict['check_out_date'] = update_data.check_out_date
-        if update_data.num_guests is not None:
-            update_dict['num_guests'] = update_data.num_guests
         if update_data.notes is not None:
             update_dict['notes'] = update_data.notes
+        
+        # Only allow changing num_guests for fullday reservations
+        if update_data.num_guests is not None and reservation_type == 'fullday':
+            update_dict['num_guests'] = update_data.num_guests
+            # Recalculate total price for fullday (€5 per person)
+            from config import settings
+            update_dict['total_price'] = update_data.num_guests * settings.FULLDAY_PRICE
         
         # Update reservation if there are changes
         if update_dict:
