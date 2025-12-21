@@ -111,19 +111,26 @@ export const adminAPI = {
     return response.data;
   },
 
-  getStats: async () => {
+  getStats: async (month, year) => {
     const token = localStorage.getItem('adminToken');
+    const params = {};
+    if (month) params.month = month;
+    if (year) params.year = year;
+    
     const response = await axios.get(`${API}/admin/stats`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
+      params
     });
     return response.data;
   },
 
-  getReservations: async (status, type) => {
+  getReservations: async (status, type, month, year) => {
     const token = localStorage.getItem('adminToken');
     const params = {};
     if (status) params.status_filter = status;
     if (type) params.reservation_type = type;
+    if (month) params.month = month;
+    if (year) params.year = year;
     
     const response = await axios.get(`${API}/admin/reservations`, {
       headers: { Authorization: `Bearer ${token}` },
