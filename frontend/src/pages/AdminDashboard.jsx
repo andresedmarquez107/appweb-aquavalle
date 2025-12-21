@@ -475,15 +475,35 @@ export const AdminDashboard = () => {
                 />
               </div>
               
-              <div>
-                <Label>Número de Personas</Label>
-                <Input
-                  type="number"
-                  min="1"
-                  value={editData.num_guests}
-                  onChange={(e) => setEditData({...editData, num_guests: parseInt(e.target.value) || 1})}
-                />
-              </div>
+              {/* Solo mostrar campo de personas para Full Day */}
+              {editingReservation.reservation_type === 'fullday' && (
+                <div>
+                  <Label>Número de Personas</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="20"
+                    value={editData.num_guests}
+                    onChange={(e) => setEditData({...editData, num_guests: e.target.value})}
+                    placeholder="Cantidad de personas"
+                  />
+                  <p className="text-xs text-stone-500 mt-1">
+                    El monto se recalculará automáticamente (€5 por persona)
+                  </p>
+                </div>
+              )}
+              
+              {/* Mostrar info de capacidad para Hospedaje */}
+              {editingReservation.reservation_type === 'hospedaje' && (
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <strong>Capacidad:</strong> {editingReservation.num_guests} personas
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    La capacidad de hospedaje es fija según las habitaciones seleccionadas
+                  </p>
+                </div>
+              )}
               
               <div>
                 <Label>Estado</Label>
