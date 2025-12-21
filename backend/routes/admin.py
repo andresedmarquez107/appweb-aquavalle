@@ -97,8 +97,12 @@ async def get_current_admin_info(admin: dict = Depends(get_current_admin)):
     return admin
 
 @router.get("/stats", response_model=DashboardStats)
-async def get_dashboard_stats(admin: dict = Depends(get_current_admin)):
-    """Get dashboard statistics"""
+async def get_dashboard_stats(
+    month: Optional[int] = Query(None, ge=1, le=12),
+    year: Optional[int] = Query(None, ge=2020, le=2100),
+    admin: dict = Depends(get_current_admin)
+):
+    """Get dashboard statistics, optionally filtered by month/year"""
     db = get_db()
     
     try:
@@ -106,12 +110,34 @@ async def get_dashboard_stats(admin: dict = Depends(get_current_admin)):
         reservations = db.table('reservations').select('*').execute()
         all_res = reservations.data
         
+        # Filter by month/year if provided
+        month_label = None
+        if month and year:
+            month_names = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+            month_label = f"{month_names[month]} {year}"
+            
+            filtered_res = []
+            for r in all_res:
+                if r['check_in_date']:
+                    res_date = datetime.fromisoformat(r['check_in_date']).date()
+                    if res_date.month == month and res_date.year == year:
+                        filtered_res.append(r)
+            all_res = filtered_res
+        
         # Calculate stats
         total = len(all_res)
         pending = len([r for r in all_res if r['status'] == 'pending'])
         confirmed = len([r for r in all_res if r['status'] == 'confirmed'])
         cancelled = len([r for r in all_res if r['status'] == 'cancelled'])
-        total_revenue = sum(r['total_price'] or 0 for r in all_res if r['status'] in ['pending', 'confirmed'])
+        
+        # Only count revenue from confirmed and completed reservations
+        total_revenue = sum(
+            float(r['total_price'] or 0) 
+            for r in all_res 
+            if r['status'] in ['confirmed', 'completed']
+        )
+        
         fullday = len([r for r in all_res if r['reservation_type'] == 'fullday'])
         hospedaje = len([r for r in all_res if r['reservation_type'] == 'hospedaje'])
         
@@ -131,7 +157,8 @@ async def get_dashboard_stats(admin: dict = Depends(get_current_admin)):
             total_revenue=total_revenue,
             fullday_bookings=fullday,
             hospedaje_bookings=hospedaje,
-            upcoming_checkins=upcoming
+            upcoming_checkins=upcoming,
+            month_label=month_label
         )
         
     except Exception as e:
