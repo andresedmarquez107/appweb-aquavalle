@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Query
 from typing import List, Optional
 from pydantic import BaseModel, EmailStr
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, date
 from database import get_db
 from auth import verify_password, get_password_hash, create_access_token, get_current_admin
 import logging
@@ -25,6 +25,9 @@ class ReservationUpdate(BaseModel):
     check_out_date: Optional[str] = None
     num_guests: Optional[int] = None
     notes: Optional[str] = None
+    # Client data updates
+    client_name: Optional[str] = None
+    client_phone: Optional[str] = None
 
 class DashboardStats(BaseModel):
     total_reservations: int
@@ -35,6 +38,8 @@ class DashboardStats(BaseModel):
     fullday_bookings: int
     hospedaje_bookings: int
     upcoming_checkins: int
+    # Monthly breakdown
+    month_label: Optional[str] = None
 
 # Endpoints
 @router.post("/login", response_model=AdminLoginResponse)
