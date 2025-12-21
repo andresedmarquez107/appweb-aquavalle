@@ -98,7 +98,7 @@ export const AdminDashboard = () => {
     setEditData({
       status: reservation.status,
       notes: reservation.notes || '',
-      num_guests: reservation.num_guests,
+      num_guests: reservation.num_guests?.toString() || '',
       client_name: reservation.client?.name || '',
       client_phone: reservation.client?.phone || ''
     });
@@ -107,7 +107,11 @@ export const AdminDashboard = () => {
   const handleSaveEdit = async () => {
     setSaving(true);
     try {
-      await adminAPI.updateReservation(editingReservation.id, editData);
+      const dataToSend = {
+        ...editData,
+        num_guests: editData.num_guests ? parseInt(editData.num_guests) : undefined
+      };
+      await adminAPI.updateReservation(editingReservation.id, dataToSend);
       toast.success('Reservación actualizada');
       setEditingReservation(null);
       loadData();
