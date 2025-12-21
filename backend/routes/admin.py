@@ -172,6 +172,8 @@ async def get_dashboard_stats(
 async def get_all_reservations(
     status_filter: Optional[str] = None,
     reservation_type: Optional[str] = None,
+    month: Optional[int] = Query(None, ge=1, le=12),
+    year: Optional[int] = Query(None, ge=2020, le=2100),
     admin: dict = Depends(get_current_admin)
 ):
     """Get all reservations with optional filters"""
@@ -193,6 +195,12 @@ async def get_all_reservations(
         # Format response
         reservations = []
         for data in result.data:
+            # Filter by month/year if provided
+            if month and year and data['check_in_date']:
+                res_date = datetime.fromisoformat(data['check_in_date']).date()
+                if res_date.month != month or res_date.year != year:
+                    continue
+            
             room_names = []
             if 'reservation_rooms' in data and data['reservation_rooms']:
                 room_names = [rr['rooms']['name'] for rr in data['reservation_rooms'] if rr.get('rooms')]
@@ -207,6 +215,7 @@ async def get_all_reservations(
                 "status": data['status'],
                 "notes": data.get('notes'),
                 "client": {
+                    "id": data['clients']['id'] if data.get('clients') else None,
                     "name": data['clients']['full_name'] if data.get('clients') else 'N/A',
                     "phone": data['clients']['phone'] if data.get('clients') else 'N/A',
                     "email": data['clients'].get('email') if data.get('clients') else None,
