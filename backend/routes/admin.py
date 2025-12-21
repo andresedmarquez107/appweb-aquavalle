@@ -240,11 +240,23 @@ async def update_reservation(
     update_data: ReservationUpdate,
     admin: dict = Depends(get_current_admin)
 ):
-    """Update a reservation"""
+    """Update a reservation and optionally client data"""
     db = get_db()
     
     try:
-        # Build update dict with only provided fields
+        # First, get the reservation to find client_id
+        reservation = db.table('reservations').select('*, clients(*)').eq('id', reservation_id).execute()
+        
+        if not reservation.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Reservación no encontrada"
+            )
+        
+        res_data = reservation.data[0]
+        client_id = res_data.get('client_id')
+        
+        # Build update dict for reservation
         update_dict = {}
         if update_data.status is not None:
             update_dict['status'] = update_data.status
@@ -257,31 +269,33 @@ async def update_reservation(
         if update_data.notes is not None:
             update_dict['notes'] = update_data.notes
         
-        if not update_dict:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No hay datos para actualizar"
-            )
+        # Update reservation if there are changes
+        if update_dict:
+            update_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
+            result = db.table('reservations').update(update_dict).eq('id', reservation_id).execute()
+            logger.info(f"Reservation update result: {result.data}")
         
-        update_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
+        # Update client data if provided
+        client_update = {}
+        if update_data.client_name is not None:
+            client_update['full_name'] = update_data.client_name
+        if update_data.client_phone is not None:
+            client_update['phone'] = update_data.client_phone
         
-        result = db.table('reservations').update(update_dict).eq('id', reservation_id).execute()
+        if client_update and client_id:
+            client_update['updated_at'] = datetime.now(timezone.utc).isoformat()
+            client_result = db.table('clients').update(client_update).eq('id', client_id).execute()
+            logger.info(f"Client update result: {client_result.data}")
         
-        if not result.data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Reservación no encontrada"
-            )
-        
-        return {"message": "Reservación actualizada", "data": result.data[0]}
+        return {"message": "Reservación actualizada", "success": True}
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error updating reservation: {str(e)}")
+        logger.error(f"Error updating reservation: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error actualizando reservación"
+            detail=f"Error actualizando reservación: {str(e)}"
         )
 
 @router.delete("/reservations/{reservation_id}")
