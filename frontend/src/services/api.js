@@ -56,6 +56,22 @@ export const availabilityAPI = {
       console.error('Error checking availability:', error);
       throw error;
     }
+  },
+
+  getFulldayAvailability: async (startDate, endDate, numGuests) => {
+    try {
+      const response = await axios.get(`${API}/availability/fullday`, {
+        params: {
+          start_date: startDate,
+          end_date: endDate,
+          num_guests: numGuests
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error checking fullday availability:', error);
+      throw error;
+    }
   }
 };
 
