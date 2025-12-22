@@ -14,6 +14,7 @@ import { RulesPage } from './pages/RulesPage';
 import { ContactPage } from './pages/ContactPage';
 import { AdminLogin } from './pages/AdminLogin';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { AdminBlocks } from './pages/AdminBlocks';
 
 function AppContent() {
   const { isWizardOpen, closeWizard } = useReservation();
