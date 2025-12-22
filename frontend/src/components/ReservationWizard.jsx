@@ -34,8 +34,9 @@ export const ReservationWizard = ({ isOpen, onClose }) => {
     setStep(3);
   };
 
-  const handleGuestSelect = (guests) => {
+  const handleGuestSelect = (guests, preloadedUnavailableDates = []) => {
     setReservationData({ ...reservationData, guests });
+    setUnavailableDates(preloadedUnavailableDates);
     setStep(3);
   };
 
