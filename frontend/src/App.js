@@ -30,6 +30,7 @@ function AppContent() {
         <Routes>
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/blocks" element={<AdminBlocks />} />
         </Routes>
         <Toaster position="top-center" richColors />
       </>
