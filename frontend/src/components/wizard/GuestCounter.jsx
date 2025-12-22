@@ -3,12 +3,15 @@ import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Users, Plus, Minus, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Users, Plus, Minus, ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
 import { MAX_FULLDAY_CAPACITY } from '../../mock';
 import { toast } from 'sonner';
+import { availabilityAPI } from '../../services/api';
+import { format, addMonths } from 'date-fns';
 
 export const GuestCounter = ({ onSelect, onBack }) => {
   const [guests, setGuests] = useState(1);
+  const [loadingAvailability, setLoadingAvailability] = useState(false);
 
   const increment = () => {
     if (guests < MAX_FULLDAY_CAPACITY) {
@@ -34,12 +37,29 @@ export const GuestCounter = ({ onSelect, onBack }) => {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (guests < 1) {
       toast.error('Debes ingresar al menos 1 persona');
       return;
     }
-    onSelect(guests);
+    
+    // Preload fullday availability before continuing
+    setLoadingAvailability(true);
+    try {
+      const today = new Date();
+      const threeMonthsLater = addMonths(today, 3);
+      const startDate = format(today, 'yyyy-MM-dd');
+      const endDate = format(threeMonthsLater, 'yyyy-MM-dd');
+      
+      const result = await availabilityAPI.getFulldayAvailability(startDate, endDate, guests);
+      onSelect(guests, result.unavailable_dates || []);
+    } catch (error) {
+      console.error('Error loading availability:', error);
+      // Continue anyway without preloaded dates
+      onSelect(guests, []);
+    } finally {
+      setLoadingAvailability(false);
+    }
   };
 
   const totalPrice = guests * 5;
