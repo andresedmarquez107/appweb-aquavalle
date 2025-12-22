@@ -337,9 +337,9 @@ export const AdminDashboard = () => {
         {/* Status/Type Filters */}
         <Card className="mb-6">
           <CardContent className="pt-6">
-            <div className="flex flex-wrap gap-4">
-              <div className="w-48">
-                <Label className="mb-2 block">Estado</Label>
+            <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:gap-4">
+              <div className="w-full sm:w-48">
+                <Label className="mb-2 block text-sm">Estado</Label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger>
                     <SelectValue />
@@ -354,8 +354,8 @@ export const AdminDashboard = () => {
                 </Select>
               </div>
               
-              <div className="w-48">
-                <Label className="mb-2 block">Tipo</Label>
+              <div className="w-full sm:w-48">
+                <Label className="mb-2 block text-sm">Tipo</Label>
                 <Select value={typeFilter} onValueChange={setTypeFilter}>
                   <SelectTrigger>
                     <SelectValue />
