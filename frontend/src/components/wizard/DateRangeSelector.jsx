@@ -62,7 +62,9 @@ export const DateRangeSelector = ({ serviceType, onSelect, onBack, roomIds, prel
         </h3>
         <p className="text-stone-600">
           {serviceType === 'fullday'
-            ? 'Elige un día para disfrutar del Full Day'
+            ? unavailableDates.length > 0
+              ? 'Las fechas en gris no tienen cupos disponibles'
+              : 'Elige un día para disfrutar del Full Day'
             : unavailableDates.length > 0
               ? 'Las fechas en gris no están disponibles'
               : 'Selecciona tus fechas de entrada y salida'
