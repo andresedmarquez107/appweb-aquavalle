@@ -142,6 +142,7 @@ export const GuestCounter = ({ onSelect, onBack }) => {
         <Button
           variant="outline"
           onClick={onBack}
+          disabled={loadingAvailability}
           className="flex items-center gap-2"
         >
           <ArrowLeft size={18} />
@@ -150,9 +151,17 @@ export const GuestCounter = ({ onSelect, onBack }) => {
         
         <Button
           onClick={handleContinue}
+          disabled={loadingAvailability}
           className="bg-amber-600 hover:bg-amber-700 text-white flex-1"
         >
-          Continuar
+          {loadingAvailability ? (
+            <>
+              <Loader2 className="animate-spin mr-2" size={18} />
+              Verificando disponibilidad...
+            </>
+          ) : (
+            'Continuar'
+          )}
         </Button>
       </div>
     </div>
