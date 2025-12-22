@@ -283,51 +283,51 @@ export const AdminDashboard = () => {
 
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 mb-6 sm:mb-8">
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="pt-4 sm:pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-stone-600">Total Reservas</p>
-                    <p className="text-3xl font-bold text-stone-800">{stats.total_reservations}</p>
+                    <p className="text-xs sm:text-sm text-stone-600">Total Reservas</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-stone-800">{stats.total_reservations}</p>
                   </div>
-                  <Calendar className="text-emerald-600" size={32} />
+                  <Calendar className="text-emerald-600 hidden sm:block" size={32} />
                 </div>
               </CardContent>
             </Card>
             
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="pt-4 sm:pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-stone-600">Pendientes</p>
-                    <p className="text-3xl font-bold text-amber-600">{stats.pending_reservations}</p>
+                    <p className="text-xs sm:text-sm text-stone-600">Pendientes</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-amber-600">{stats.pending_reservations}</p>
                   </div>
-                  <Clock className="text-amber-600" size={32} />
+                  <Clock className="text-amber-600 hidden sm:block" size={32} />
                 </div>
               </CardContent>
             </Card>
             
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="pt-4 sm:pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-stone-600">Confirmadas</p>
-                    <p className="text-3xl font-bold text-emerald-600">{stats.confirmed_reservations}</p>
+                    <p className="text-xs sm:text-sm text-stone-600">Confirmadas</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-emerald-600">{stats.confirmed_reservations}</p>
                   </div>
-                  <CheckCircle className="text-emerald-600" size={32} />
+                  <CheckCircle className="text-emerald-600 hidden sm:block" size={32} />
                 </div>
               </CardContent>
             </Card>
             
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="pt-4 sm:pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-stone-600">Ingresos (Confirmadas)</p>
-                    <p className="text-3xl font-bold text-stone-800">€{stats.total_revenue?.toFixed(2)}</p>
+                    <p className="text-xs sm:text-sm text-stone-600">Ingresos</p>
+                    <p className="text-xl sm:text-3xl font-bold text-stone-800">€{stats.total_revenue?.toFixed(0)}</p>
                   </div>
-                  <DollarSign className="text-emerald-600" size={32} />
+                  <DollarSign className="text-emerald-600 hidden sm:block" size={32} />
                 </div>
               </CardContent>
             </Card>
