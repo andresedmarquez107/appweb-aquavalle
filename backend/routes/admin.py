@@ -41,6 +41,25 @@ class DashboardStats(BaseModel):
     # Monthly breakdown
     month_label: Optional[str] = None
 
+# Availability Block Models
+class BlockCreate(BaseModel):
+    room_id: Optional[str] = None  # None = all rooms
+    start_date: str
+    end_date: str
+    block_type: str  # maintenance, private_event, other
+    reason: Optional[str] = None
+
+class BlockResponse(BaseModel):
+    id: str
+    room_id: Optional[str]
+    room_name: Optional[str]
+    start_date: str
+    end_date: str
+    block_type: str
+    reason: Optional[str]
+    created_at: str
+
+
 # Endpoints
 @router.post("/login", response_model=AdminLoginResponse)
 async def admin_login(credentials: AdminLogin):
