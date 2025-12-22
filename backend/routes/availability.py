@@ -92,4 +92,84 @@ async def get_all_rooms_availability(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
+
+
+@router.get("/fullday")
+async def get_fullday_availability(
+    start_date: date = Query(...),
+    end_date: date = Query(...),
+    num_guests: int = Query(..., ge=1, le=20)
+):
+    """Get available dates for Full Day based on requested number of guests"""
+    db = get_db()
+    
+    try:
+        available_dates = []
+        unavailable_dates = []
+        
+        # Get all fullday reservations in the date range
+        reservations = db.table('reservations').select('*').eq(
+            'reservation_type', 'fullday'
+        ).in_('status', ['pending', 'confirmed']).execute()
+        
+        # Get all blocks
+        blocks = db.table('availability_blocks').select('*').execute()
+        
+        # Build a map of date -> total guests booked
+        guests_per_date = {}
+        for res in reservations.data:
+            res_date = res['check_in_date']
+            if res_date not in guests_per_date:
+                guests_per_date[res_date] = 0
+            guests_per_date[res_date] += res['num_guests'] or 0
+        
+        # Build a set of blocked dates
+        blocked_dates = set()
+        for block in blocks.data:
+            # Only consider blocks that apply to all rooms (room_id is null)
+            if block['room_id'] is not None:
+                continue
+            block_start = datetime.fromisoformat(block['start_date']).date() if isinstance(block['start_date'], str) else block['start_date']
+            block_end = datetime.fromisoformat(block['end_date']).date() if isinstance(block['end_date'], str) else block['end_date']
+            current = block_start
+            while current <= block_end:
+                blocked_dates.add(current.isoformat())
+                current += timedelta(days=1)
+        
+        # Check each date
+        current_date = start_date
+        while current_date <= end_date:
+            date_str = current_date.isoformat()
+            
+            # Check if date is blocked
+            if date_str in blocked_dates:
+                unavailable_dates.append(date_str)
+            else:
+                # Check capacity
+                current_guests = guests_per_date.get(date_str, 0)
+                remaining_capacity = settings.MAX_FULLDAY_CAPACITY - current_guests
+                
+                if remaining_capacity >= num_guests:
+                    available_dates.append(date_str)
+                else:
+                    unavailable_dates.append(date_str)
+            
+            current_date += timedelta(days=1)
+        
+        return {
+            "start_date": start_date.isoformat(),
+            "end_date": end_date.isoformat(),
+            "num_guests": num_guests,
+            "max_capacity": settings.MAX_FULLDAY_CAPACITY,
+            "available_dates": available_dates,
+            "unavailable_dates": unavailable_dates
+        }
+        
+    except Exception as e:
+        logger.error(f"Error checking fullday availability: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
         )
