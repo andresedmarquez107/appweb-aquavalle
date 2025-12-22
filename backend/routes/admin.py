@@ -353,3 +353,118 @@ async def cancel_reservation(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error cancelando reservación"
         )
+
+
+# =====================================================
+# AVAILABILITY BLOCKS ENDPOINTS
+# =====================================================
+
+@router.get("/blocks")
+async def get_all_blocks(admin: dict = Depends(get_current_admin)):
+    """Get all availability blocks"""
+    db = get_db()
+    
+    try:
+        result = db.table('availability_blocks').select(
+            '*, rooms(name)'
+        ).order('start_date', desc=False).execute()
+        
+        blocks = []
+        for block in result.data:
+            blocks.append({
+                "id": block['id'],
+                "room_id": block.get('room_id'),
+                "room_name": block['rooms']['name'] if block.get('rooms') else "Todas las habitaciones",
+                "start_date": block['start_date'],
+                "end_date": block['end_date'],
+                "block_type": block['block_type'],
+                "reason": block.get('reason'),
+                "created_at": block['created_at']
+            })
+        
+        return blocks
+        
+    except Exception as e:
+        logger.error(f"Error getting blocks: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error obteniendo bloqueos"
+        )
+
+
+@router.post("/blocks")
+async def create_block(
+    block_data: BlockCreate,
+    admin: dict = Depends(get_current_admin)
+):
+    """Create a new availability block"""
+    db = get_db()
+    
+    try:
+        # Validate dates
+        start = datetime.strptime(block_data.start_date, '%Y-%m-%d').date()
+        end = datetime.strptime(block_data.end_date, '%Y-%m-%d').date()
+        
+        if end < start:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La fecha de fin debe ser igual o posterior a la fecha de inicio"
+            )
+        
+        # Create block
+        block_insert = {
+            'room_id': block_data.room_id if block_data.room_id else None,
+            'start_date': block_data.start_date,
+            'end_date': block_data.end_date,
+            'block_type': block_data.block_type,
+            'reason': block_data.reason,
+            'created_by': admin.get('admin_id')
+        }
+        
+        result = db.table('availability_blocks').insert(block_insert).execute()
+        
+        if not result.data:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Error creando bloqueo"
+            )
+        
+        return {"message": "Bloqueo creado exitosamente", "data": result.data[0]}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating block: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creando bloqueo: {str(e)}"
+        )
+
+
+@router.delete("/blocks/{block_id}")
+async def delete_block(
+    block_id: str,
+    admin: dict = Depends(get_current_admin)
+):
+    """Delete an availability block"""
+    db = get_db()
+    
+    try:
+        result = db.table('availability_blocks').delete().eq('id', block_id).execute()
+        
+        if not result.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Bloqueo no encontrado"
+            )
+        
+        return {"message": "Bloqueo eliminado exitosamente"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting block: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error eliminando bloqueo"
+        )
