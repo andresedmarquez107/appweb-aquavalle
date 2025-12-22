@@ -7,9 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../components/ui/dialog';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
+import { Checkbox } from '../components/ui/checkbox';
 import { toast } from 'sonner';
 import {
-  Calendar, ArrowLeft, Plus, Trash2, Loader2, Home, Wrench, PartyPopper, Ban
+  Calendar, ArrowLeft, Plus, Trash2, Loader2, Home, Wrench, PartyPopper, Ban, Sun
 } from 'lucide-react';
 import { adminAPI, roomsAPI } from '../services/api';
 
@@ -25,7 +26,8 @@ export const AdminBlocks = () => {
     start_date: '',
     end_date: '',
     block_type: 'maintenance',
-    reason: ''
+    reason: '',
+    blocks_fullday: false
   });
 
   useEffect(() => {
