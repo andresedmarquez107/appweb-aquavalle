@@ -173,4 +173,3 @@ async def get_fullday_availability(
             detail=str(e)
         )
 
-        )
