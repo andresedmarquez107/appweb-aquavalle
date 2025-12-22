@@ -143,19 +143,38 @@ export const AdminBlocks = () => {
     <div className="min-h-screen bg-stone-100">
       {/* Header */}
       <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/admin')}>
-              <ArrowLeft size={18} className="mr-1" /> Volver
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-stone-800">Bloqueo de Fechas</h1>
-              <p className="text-stone-600 text-sm">Gestionar disponibilidad de habitaciones</p>
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          {/* Desktop Layout */}
+          <div className="hidden md:flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/admin')}>
+                <ArrowLeft size={18} className="mr-1" /> Volver
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-stone-800">Bloqueo de Fechas</h1>
+                <p className="text-stone-600 text-sm">Gestionar disponibilidad de habitaciones</p>
+              </div>
             </div>
+            <Button onClick={() => setShowCreateDialog(true)} className="bg-emerald-700 hover:bg-emerald-800">
+              <Plus size={18} className="mr-1" /> Nuevo Bloqueo
+            </Button>
           </div>
-          <Button onClick={() => setShowCreateDialog(true)} className="bg-emerald-700 hover:bg-emerald-800">
-            <Plus size={18} className="mr-1" /> Nuevo Bloqueo
-          </Button>
+          
+          {/* Mobile Layout */}
+          <div className="md:hidden">
+            <div className="flex items-center gap-2 mb-3">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/admin')}>
+                <ArrowLeft size={18} />
+              </Button>
+              <div>
+                <h1 className="text-lg font-bold text-stone-800">Bloqueo de Fechas</h1>
+                <p className="text-stone-500 text-xs">Gestionar disponibilidad</p>
+              </div>
+            </div>
+            <Button onClick={() => setShowCreateDialog(true)} className="w-full bg-emerald-700 hover:bg-emerald-800">
+              <Plus size={18} className="mr-1" /> Nuevo Bloqueo
+            </Button>
+          </div>
         </div>
       </header>
 
