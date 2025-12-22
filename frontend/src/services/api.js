@@ -153,6 +153,31 @@ export const adminAPI = {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
+  },
+
+  // Availability Blocks
+  getBlocks: async () => {
+    const token = localStorage.getItem('adminToken');
+    const response = await axios.get(`${API}/admin/blocks`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+
+  createBlock: async (data) => {
+    const token = localStorage.getItem('adminToken');
+    const response = await axios.post(`${API}/admin/blocks`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+
+  deleteBlock: async (id) => {
+    const token = localStorage.getItem('adminToken');
+    const response = await axios.delete(`${API}/admin/blocks/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
   }
 };
 
