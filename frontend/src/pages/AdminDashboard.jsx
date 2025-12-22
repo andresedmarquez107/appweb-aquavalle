@@ -10,7 +10,7 @@ import { Textarea } from '../components/ui/textarea';
 import { toast } from 'sonner';
 import {
   Calendar, Users, Home, DollarSign, Clock, LogOut, RefreshCw,
-  CheckCircle, XCircle, AlertCircle, Edit, Trash2, Loader2, Phone, Mail, Filter
+  CheckCircle, XCircle, AlertCircle, Edit, Trash2, Loader2, Phone, Mail, Filter, CalendarOff
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
 
