@@ -124,12 +124,17 @@ async def get_fullday_availability(
                 guests_per_date[res_date] = 0
             guests_per_date[res_date] += res['num_guests'] or 0
         
-        # Build a set of blocked dates
+        # Build a set of blocked dates for fullday
         blocked_dates = set()
         for block in blocks.data:
-            # Only consider blocks that apply to all rooms (room_id is null)
-            if block['room_id'] is not None:
+            # Consider blocks that explicitly block fullday OR blocks for all rooms (room_id is null)
+            blocks_fullday = block.get('blocks_fullday', False)
+            is_all_rooms = block['room_id'] is None
+            
+            # Block fullday if: blocks_fullday is True OR it's a block for all rooms
+            if not blocks_fullday and not is_all_rooms:
                 continue
+                
             block_start = datetime.fromisoformat(block['start_date']).date() if isinstance(block['start_date'], str) else block['start_date']
             block_end = datetime.fromisoformat(block['end_date']).date() if isinstance(block['end_date'], str) else block['end_date']
             current = block_start
