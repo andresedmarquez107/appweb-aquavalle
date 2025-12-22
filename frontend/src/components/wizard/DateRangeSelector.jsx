@@ -39,8 +39,8 @@ export const DateRangeSelector = ({ serviceType, onSelect, onBack, roomIds, prel
     // Disable past dates
     if (date < today) return true;
     
-    // For hospedaje, disable unavailable dates
-    if (serviceType === 'hospedaje' && unavailableDates.length > 0) {
+    // Disable unavailable dates for both hospedaje and fullday
+    if (unavailableDates.length > 0) {
       const dateStr = format(date, 'yyyy-MM-dd');
       return unavailableDates.includes(dateStr);
     }
