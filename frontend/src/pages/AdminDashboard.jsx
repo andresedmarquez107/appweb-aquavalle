@@ -226,53 +226,57 @@ export const AdminDashboard = () => {
         {/* Month/Year Filter */}
         <Card className="mb-6">
           <CardContent className="pt-6">
-            <div className="flex flex-wrap items-end gap-4">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-end gap-3 sm:gap-4">
               <div className="flex items-center gap-2">
                 <Filter size={18} className="text-stone-500" />
-                <span className="font-medium text-stone-700">Filtrar por período:</span>
+                <span className="font-medium text-stone-700 text-sm sm:text-base">Filtrar por período:</span>
               </div>
               
-              <div className="w-40">
-                <Label className="mb-1 block text-xs">Mes</Label>
-                <Select value={monthFilter} onValueChange={setMonthFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos los meses</SelectItem>
-                    {months.map(m => (
-                      <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-3 sm:flex sm:gap-4">
+                <div className="w-full sm:w-40">
+                  <Label className="mb-1 block text-xs">Mes</Label>
+                  <Select value={monthFilter} onValueChange={setMonthFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los meses</SelectItem>
+                      {months.map(m => (
+                        <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="w-full sm:w-32">
+                  <Label className="mb-1 block text-xs">Año</Label>
+                  <Select value={yearFilter} onValueChange={setYearFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      {years.map(y => (
+                        <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               
-              <div className="w-32">
-                <Label className="mb-1 block text-xs">Año</Label>
-                <Select value={yearFilter} onValueChange={setYearFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    {years.map(y => (
-                      <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="flex items-center justify-between sm:justify-start gap-2 sm:ml-auto">
+                {(monthFilter !== 'all' || yearFilter !== 'all') && (
+                  <Button variant="ghost" size="sm" onClick={clearFilters}>
+                    Limpiar filtros
+                  </Button>
+                )}
+                
+                {stats?.month_label && (
+                  <span className="text-emerald-700 font-medium text-sm">
+                    {stats.month_label}
+                  </span>
+                )}
               </div>
-              
-              {(monthFilter !== 'all' || yearFilter !== 'all') && (
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
-                  Limpiar filtros
-                </Button>
-              )}
-              
-              {stats?.month_label && (
-                <span className="text-emerald-700 font-medium ml-auto">
-                  Mostrando: {stats.month_label}
-                </span>
-              )}
             </div>
           </CardContent>
         </Card>
