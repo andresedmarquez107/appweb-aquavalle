@@ -335,6 +335,24 @@ export const AdminBlocks = () => {
                 rows={2}
               />
             </div>
+            
+            {/* Checkbox para Full Day */}
+            <div className="flex items-center space-x-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
+              <Checkbox
+                id="blocks_fullday"
+                checked={newBlock.blocks_fullday}
+                onCheckedChange={(checked) => setNewBlock({...newBlock, blocks_fullday: checked})}
+              />
+              <div className="flex-1">
+                <Label htmlFor="blocks_fullday" className="text-amber-800 font-medium cursor-pointer flex items-center gap-2">
+                  <Sun size={16} />
+                  Bloquear también para Full Day
+                </Label>
+                <p className="text-xs text-amber-600 mt-1">
+                  Marcando esta opción, las fechas también quedarán bloqueadas para el servicio de día completo
+                </p>
+              </div>
+            </div>
           </div>
           
           <DialogFooter>
