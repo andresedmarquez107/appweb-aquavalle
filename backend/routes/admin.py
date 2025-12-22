@@ -48,6 +48,7 @@ class BlockCreate(BaseModel):
     end_date: str
     block_type: str  # maintenance, private_event, other
     reason: Optional[str] = None
+    blocks_fullday: bool = False  # Also block Full Day service
 
 class BlockResponse(BaseModel):
     id: str
@@ -57,6 +58,7 @@ class BlockResponse(BaseModel):
     end_date: str
     block_type: str
     reason: Optional[str]
+    blocks_fullday: bool
     created_at: str
 
 
