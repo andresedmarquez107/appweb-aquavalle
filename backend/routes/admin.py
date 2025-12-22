@@ -421,6 +421,7 @@ async def create_block(
             'end_date': block_data.end_date,
             'block_type': block_data.block_type,
             'reason': block_data.reason,
+            'blocks_fullday': block_data.blocks_fullday,
             'created_by': admin.get('admin_id')
         }
         
