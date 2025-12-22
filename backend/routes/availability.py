@@ -92,6 +92,7 @@ async def get_all_rooms_availability(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
+        )
 
 
 @router.get("/fullday")
