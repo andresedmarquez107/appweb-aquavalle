@@ -185,6 +185,9 @@ export const AdminDashboard = () => {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-stone-600 text-sm">{adminEmail}</span>
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin/blocks')}>
+              <CalendarOff size={16} className="mr-1" /> Bloqueos
+            </Button>
             <Button variant="outline" size="sm" onClick={loadData} disabled={loading}>
               <RefreshCw size={16} className={`mr-1 ${loading ? 'animate-spin' : ''}`} /> Actualizar
             </Button>
