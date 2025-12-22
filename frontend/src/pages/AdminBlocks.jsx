@@ -73,7 +73,8 @@ export const AdminBlocks = () => {
         start_date: newBlock.start_date,
         end_date: newBlock.end_date,
         block_type: newBlock.block_type,
-        reason: newBlock.reason || null
+        reason: newBlock.reason || null,
+        blocks_fullday: newBlock.blocks_fullday
       });
       toast.success('Bloqueo creado exitosamente');
       setShowCreateDialog(false);
@@ -82,7 +83,8 @@ export const AdminBlocks = () => {
         start_date: '',
         end_date: '',
         block_type: 'maintenance',
-        reason: ''
+        reason: '',
+        blocks_fullday: false
       });
       loadData();
     } catch (err) {
