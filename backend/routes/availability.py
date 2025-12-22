@@ -1,9 +1,11 @@
 from fastapi import APIRouter, HTTPException, status, Query
 from typing import List, Optional
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from models import Room
 from services.room_service import RoomService
 from services.reservation_service import ReservationService
+from database import get_db
+from config import settings
 import logging
 
 logger = logging.getLogger(__name__)
