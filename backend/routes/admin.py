@@ -381,6 +381,7 @@ async def get_all_blocks(admin: dict = Depends(get_current_admin)):
                 "end_date": block['end_date'],
                 "block_type": block['block_type'],
                 "reason": block.get('reason'),
+                "blocks_fullday": block.get('blocks_fullday', False),
                 "created_at": block['created_at']
             })
         
