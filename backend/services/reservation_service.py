@@ -190,6 +190,24 @@ class ReservationService:
         """Check if room is available for given date range"""
         db = get_db()
         
+        # First, check for availability blocks
+        blocks_response = db.table('availability_blocks').select('*').execute()
+        
+        for block in blocks_response.data:
+            # Check if block applies to this room (room_id is null = applies to all rooms)
+            if block['room_id'] is not None and block['room_id'] != room_id:
+                continue
+            
+            block_start = datetime.fromisoformat(block['start_date']).date() if isinstance(block['start_date'], str) else block['start_date']
+            block_end = datetime.fromisoformat(block['end_date']).date() if isinstance(block['end_date'], str) else block['end_date']
+            
+            # Check for overlap with block
+            no_overlap = (check_in > block_end) or (check_out <= block_start)
+            
+            if not no_overlap:
+                logger.info(f"❌ Room blocked from {block_start} to {block_end} ({block['block_type']})")
+                return False
+        
         # Check for overlapping reservations
         response = db.table('reservation_rooms').select(
             'reservations!inner(check_in_date, check_out_date, status)'
@@ -225,3 +243,4 @@ class ReservationService:
         
         logger.info(f"Room is available!")
         return True
+
