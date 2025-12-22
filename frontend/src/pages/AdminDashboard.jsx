@@ -374,10 +374,11 @@ export const AdminDashboard = () => {
         {/* Reservations Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Reservaciones ({filteredReservations.length})</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Reservaciones ({filteredReservations.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
@@ -457,13 +458,79 @@ export const AdminDashboard = () => {
                   ))}
                 </tbody>
               </table>
-              
-              {filteredReservations.length === 0 && (
-                <div className="text-center py-8 text-stone-500">
-                  No hay reservaciones que coincidan con los filtros
-                </div>
-              )}
             </div>
+            
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-3">
+              {filteredReservations.map((res) => (
+                <div key={res.id} className="border rounded-lg p-4 bg-white">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <p className="font-medium text-stone-800">{res.client?.name}</p>
+                      <p className="text-xs text-stone-500">{res.client?.phone}</p>
+                    </div>
+                    {getStatusBadge(res.status)}
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                    <div>
+                      <p className="text-stone-500 text-xs">Tipo</p>
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                        res.reservation_type === 'hospedaje' 
+                          ? 'bg-blue-100 text-blue-800' 
+                          : 'bg-purple-100 text-purple-800'
+                      }`}>
+                        {res.reservation_type === 'hospedaje' ? 'Hospedaje' : 'Full Day'}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-stone-500 text-xs">Total</p>
+                      <p className="font-bold text-stone-800">€{res.total_price}</p>
+                    </div>
+                    <div>
+                      <p className="text-stone-500 text-xs">Fechas</p>
+                      <p className="text-stone-800">{res.check_in_date}</p>
+                      {res.check_out_date && res.check_out_date !== res.check_in_date && (
+                        <p className="text-stone-500 text-xs">hasta {res.check_out_date}</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-stone-500 text-xs">Habitación</p>
+                      <p className="text-stone-800">
+                        {res.rooms?.length > 0 ? res.rooms.join(', ') : `${res.num_guests} pers.`}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2 border-t pt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => handleEditClick(res)}
+                    >
+                      <Edit size={14} className="mr-1" /> Editar
+                    </Button>
+                    {res.status !== 'cancelled' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handleCancel(res.id)}
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+              
+            {filteredReservations.length === 0 && (
+              <div className="text-center py-8 text-stone-500">
+                No hay reservaciones que coincidan con los filtros
+              </div>
+            )}
           </CardContent>
         </Card>
       </main>
