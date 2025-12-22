@@ -235,14 +235,14 @@ export const AdminBlocks = () => {
             <div>
               <Label>Habitación</Label>
               <Select 
-                value={newBlock.room_id} 
-                onValueChange={(v) => setNewBlock({...newBlock, room_id: v})}
+                value={newBlock.room_id || 'all'} 
+                onValueChange={(v) => setNewBlock({...newBlock, room_id: v === 'all' ? '' : v})}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar habitación" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas las habitaciones</SelectItem>
+                  <SelectItem value="all">Todas las habitaciones</SelectItem>
                   {rooms.map(room => (
                     <SelectItem key={room.id} value={room.id}>{room.name}</SelectItem>
                   ))}
