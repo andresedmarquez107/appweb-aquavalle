@@ -178,22 +178,46 @@ export const AdminDashboard = () => {
     <div className="min-h-screen bg-stone-100">
       {/* Header */}
       <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-stone-800">Panel de Administración</h1>
-            <p className="text-stone-600 text-sm">Cabañas AquaValle</p>
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          {/* Desktop Layout */}
+          <div className="hidden md:flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold text-stone-800">Panel de Administración</h1>
+              <p className="text-stone-600 text-sm">Cabañas AquaValle</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-stone-600 text-sm">{adminEmail}</span>
+              <Button variant="outline" size="sm" onClick={() => navigate('/admin/blocks')}>
+                <CalendarOff size={16} className="mr-1" /> Bloqueos
+              </Button>
+              <Button variant="outline" size="sm" onClick={loadData} disabled={loading}>
+                <RefreshCw size={16} className={`mr-1 ${loading ? 'animate-spin' : ''}`} /> Actualizar
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut size={16} className="mr-1" /> Salir
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-stone-600 text-sm">{adminEmail}</span>
-            <Button variant="outline" size="sm" onClick={() => navigate('/admin/blocks')}>
-              <CalendarOff size={16} className="mr-1" /> Bloqueos
-            </Button>
-            <Button variant="outline" size="sm" onClick={loadData} disabled={loading}>
-              <RefreshCw size={16} className={`mr-1 ${loading ? 'animate-spin' : ''}`} /> Actualizar
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut size={16} className="mr-1" /> Salir
-            </Button>
+          
+          {/* Mobile Layout */}
+          <div className="md:hidden">
+            <div className="flex justify-between items-center mb-3">
+              <div>
+                <h1 className="text-xl font-bold text-stone-800">Panel Admin</h1>
+                <p className="text-stone-600 text-xs">{adminEmail}</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut size={16} />
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate('/admin/blocks')}>
+                <CalendarOff size={16} className="mr-1" /> Bloqueos
+              </Button>
+              <Button variant="outline" size="sm" className="flex-1" onClick={loadData} disabled={loading}>
+                <RefreshCw size={16} className={`mr-1 ${loading ? 'animate-spin' : ''}`} /> Actualizar
+              </Button>
+            </div>
           </div>
         </div>
       </header>
