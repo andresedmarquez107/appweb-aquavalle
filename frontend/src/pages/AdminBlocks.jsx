@@ -219,7 +219,14 @@ export const AdminBlocks = () => {
                         <Home size={20} className="text-stone-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-stone-800">{block.room_name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-stone-800">{block.room_name}</p>
+                          {block.blocks_fullday && (
+                            <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full flex items-center gap-1">
+                              <Sun size={12} /> Full Day
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-stone-600">
                           {block.start_date} → {block.end_date}
                         </p>
