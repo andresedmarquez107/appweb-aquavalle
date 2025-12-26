@@ -1,10 +1,74 @@
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
-import { rules } from '../mock';
 import { 
   AlertCircle, Clock, Shield, Heart, TreePine, Ban, 
-  Waves, ShowerHead, UtensilsCrossed, Volume2, AlertTriangle 
+  Waves, AlertTriangle, Home, Users, VolumeX, 
+  Cigarette, UserPlus, Speaker, Pill, Package, Gavel
 } from 'lucide-react';
+
+// Reglas generales con iconos
+const generalRules = [
+  {
+    title: 'Horario de silencio',
+    description: 'Para respetar el descanso de todos, el volumen de la música y ruidos fuertes debe moderarse a partir de las 10:00 p.m. La música debe apagarse por completo a las 12am en las áreas comunes.',
+    icon: Clock,
+    color: 'text-blue-600'
+  },
+  {
+    title: 'Cuidado de las instalaciones',
+    description: 'Mantenga las cabañas y áreas comunes en buen estado. Cualquier daño ocasionado será responsabilidad del huésped.',
+    icon: Home,
+    color: 'text-emerald-600'
+  },
+  {
+    title: 'Conducta apropiada',
+    description: 'No se permiten conductas inapropiadas o inmorales en las áreas exteriores de las cabañas ni en espacios comunes.',
+    icon: Heart,
+    color: 'text-pink-600'
+  },
+  {
+    title: 'Uso de áreas comunes',
+    description: 'Respete el mobiliario y evite dejar basura fuera de los espacios designados.',
+    icon: Users,
+    color: 'text-purple-600'
+  },
+  {
+    title: 'No fumar',
+    description: 'No fumar dentro de las cabañas.',
+    icon: Cigarette,
+    color: 'text-red-600'
+  },
+  {
+    title: 'Capacidad de reserva',
+    description: 'No se permite el ingreso de más personas de las establecidas en la reserva.',
+    icon: UserPlus,
+    color: 'text-orange-600'
+  },
+  {
+    title: 'Equipo de sonido',
+    description: 'Prohibido el ingreso de cualquier tipo de equipo de sonido, solo se permite el uso del sonido proporcionado por las instalaciones.',
+    icon: Speaker,
+    color: 'text-indigo-600'
+  },
+  {
+    title: 'Sustancias prohibidas',
+    description: 'Prohibido el uso de drogas y sustancias ilícitas. El incumplimiento será motivo de desalojo inmediato.',
+    icon: Pill,
+    color: 'text-red-700'
+  },
+  {
+    title: 'Objetos de valor',
+    description: 'Cabañas AquaValle no se hace responsable por objetos de valor olvidados dentro de las instalaciones.',
+    icon: Package,
+    color: 'text-amber-600'
+  },
+  {
+    title: 'Sanciones',
+    description: 'El incumplimiento de estas normas puede conllevar sanciones, incluyendo la expulsión sin derecho a reembolso.',
+    icon: Gavel,
+    color: 'text-stone-700'
+  }
+];
 
 // Reglas de la piscina
 const poolRules = [
@@ -90,16 +154,24 @@ export const Rules = () => {
             Normas Generales
           </h3>
           <Accordion type="single" collapsible className="w-full">
-            {rules.map((rule, index) => (
-              <AccordionItem key={index} value={`item-${index}`}>
-                <AccordionTrigger className="text-left hover:text-emerald-700 transition-colors">
-                  <span className="font-semibold text-stone-800">{rule.title}</span>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <p className="text-stone-600 leading-relaxed">{rule.description}</p>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
+            {generalRules.map((rule, index) => {
+              const IconComponent = rule.icon;
+              return (
+                <AccordionItem key={index} value={`item-${index}`}>
+                  <AccordionTrigger className="text-left hover:text-emerald-700 transition-colors">
+                    <span className="font-semibold text-stone-800 flex items-center gap-3">
+                      <span className={`p-1.5 rounded-lg bg-stone-100 ${rule.color}`}>
+                        <IconComponent size={18} />
+                      </span>
+                      {rule.title}
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <p className="text-stone-600 leading-relaxed ml-10">{rule.description}</p>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
           </Accordion>
         </div>
 
