@@ -262,16 +262,43 @@ export const ReservationConfirmation = ({ data, onClose }) => {
         </div>
       </Card>
 
-      {/* WhatsApp buttons */}
-      <div className="space-y-3">
+      {/* WhatsApp Confirmation Section */}
+      <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-6 mb-4">
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center gap-2 bg-amber-200 text-amber-800 px-4 py-2 rounded-full font-semibold text-sm mb-3">
+            <span className="animate-pulse">⚠️</span>
+            IMPORTANTE
+          </div>
+          <h4 className="text-lg font-bold text-amber-900 mb-2">
+            Tu reserva aún no está confirmada
+          </h4>
+          <p className="text-amber-800 text-sm">
+            Para completar tu reserva, debes enviar los datos por WhatsApp presionando el botón de abajo
+          </p>
+        </div>
+
+        {/* Flechas animadas apuntando al botón */}
+        <div className="flex justify-center gap-4 mb-4 text-green-600">
+          <span className="animate-bounce text-2xl">↓</span>
+          <span className="animate-bounce text-2xl" style={{animationDelay: '0.1s'}}>↓</span>
+          <span className="animate-bounce text-2xl" style={{animationDelay: '0.2s'}}>↓</span>
+        </div>
+
         <Button
           onClick={handleWhatsAppRedirect}
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-semibold"
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
         >
           <MessageCircle className="mr-2" size={24} />
-          Abrir WhatsApp
+          Confirmar Reserva vía WhatsApp
         </Button>
 
+        <p className="text-center text-xs text-amber-700 mt-3">
+          Al presionar el botón se abrirá WhatsApp con los datos de tu reserva
+        </p>
+      </div>
+
+      {/* Botón alternativo */}
+      <div className="space-y-3">
         <Button
           onClick={() => {
             const whatsappData = {
@@ -324,14 +351,14 @@ export const ReservationConfirmation = ({ data, onClose }) => {
             });
           }}
           variant="outline"
-          className="w-full border-2 border-green-600 text-green-700 hover:bg-green-50 py-6 text-lg font-semibold"
+          className="w-full border-2 border-stone-300 text-stone-600 hover:bg-stone-50 py-4"
         >
-          Copiar Mensaje
+          📋 Copiar Mensaje (alternativa)
         </Button>
       </div>
 
       <p className="text-center text-sm text-stone-500 mt-4">
-        Si WhatsApp no abre, copia el mensaje y envíalo manualmente al +58 424 773 9434
+        ¿Problemas con el botón? Copia el mensaje y envíalo manualmente al +58 424 773 9434
       </p>
     </div>
   );
