@@ -171,11 +171,11 @@ export const ReservationConfirmation = ({ data, onClose }) => {
   return (
     <div className="py-6">
       <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-emerald-100 rounded-full mb-4 animate-bounce">
+        <div className="inline-flex items-center justify-center w-20 h-20 bg-emerald-100 rounded-full mb-4">
           <CheckCircle className="text-emerald-700" size={48} />
         </div>
-        <h3 className="text-2xl font-bold text-stone-800 mb-2">¡Reserva Confirmada!</h3>
-        <p className="text-stone-600">Revisa los detalles de tu reserva</p>
+        <h3 className="text-2xl font-bold text-stone-800 mb-2">¡Reserva Registrada!</h3>
+        <p className="text-stone-600">Revisa los detalles y confirma por WhatsApp</p>
       </div>
 
       <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-6 mb-6">
