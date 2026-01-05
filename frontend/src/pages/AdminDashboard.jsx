@@ -26,6 +26,7 @@ export const AdminDashboard = () => {
   const [editingReservation, setEditingReservation] = useState(null);
   const [editData, setEditData] = useState({});
   const [saving, setSaving] = useState(false);
+  const [deletingCancelled, setDeletingCancelled] = useState(false);
 
   const adminEmail = localStorage.getItem('adminEmail');
   
