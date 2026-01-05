@@ -50,6 +50,25 @@ El usuario quiere construir una aplicación web completa para su negocio de alqu
 - No se puede saltar sobre fechas bloqueadas (20→23 no permite)
 - El backend acepta correctamente las reservas
 
+### Feature: Eliminar reservaciones canceladas permanentemente
+**Descripción**: Se agregó la funcionalidad para que el administrador pueda eliminar permanentemente las reservaciones que han sido canceladas, liberando espacio en la base de datos.
+
+**Nuevos endpoints**:
+- `DELETE /api/admin/reservations/{id}/permanent` - Elimina una reservación cancelada específica
+- `DELETE /api/admin/reservations/cancelled/all` - Elimina todas las reservaciones canceladas
+
+**Cambios en UI**:
+- Botón "Limpiar Canceladas" en el header del panel admin (desktop y móvil)
+- Ícono de papelera en cada reservación cancelada para eliminar individualmente
+- Diálogos de confirmación antes de cada eliminación
+
+**Files Modified**:
+- `/app/backend/routes/admin.py` - Nuevos endpoints
+- `/app/frontend/src/services/api.js` - Nuevas funciones API
+- `/app/frontend/src/pages/AdminDashboard.jsx` - Botones y funcionalidad UI
+
+**Testing**: Verificado con curl que el endpoint elimina correctamente las reservaciones
+
 ---
 
 # Roadmap
