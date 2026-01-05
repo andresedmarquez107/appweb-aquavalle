@@ -505,12 +505,23 @@ export const AdminDashboard = () => {
                           >
                             <Edit size={16} />
                           </Button>
-                          {res.status !== 'cancelled' && (
+                          {res.status !== 'cancelled' ? (
                             <Button
                               variant="ghost"
                               size="sm"
                               className="text-red-600 hover:text-red-700"
                               onClick={() => handleCancel(res.id)}
+                              title="Cancelar reservación"
+                            >
+                              <XCircle size={16} />
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => handlePermanentDelete(res.id)}
+                              title="Eliminar permanentemente"
                             >
                               <Trash2 size={16} />
                             </Button>
