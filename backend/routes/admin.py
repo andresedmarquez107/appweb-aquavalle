@@ -387,6 +387,14 @@ async def permanently_delete_reservation(
         # Then delete the reservation
         result = db.table('reservations').delete().eq('id', reservation_id).execute()
         
+        # Verify the deletion actually happened
+        verify = db.table('reservations').select('id').eq('id', reservation_id).execute()
+        if verify.data:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No se pudo eliminar la reservación. Es necesario agregar políticas RLS de DELETE en Supabase. Contacte al administrador del sistema."
+            )
+        
         return {"message": "Reservación eliminada permanentemente", "success": True}
         
     except HTTPException:
@@ -413,7 +421,7 @@ async def delete_all_cancelled_reservations(
         if not cancelled.data:
             return {"message": "No hay reservaciones canceladas para eliminar", "deleted_count": 0}
         
-        deleted_count = len(cancelled.data)
+        initial_count = len(cancelled.data)
         reservation_ids = [r['id'] for r in cancelled.data]
         
         # Delete related records in reservation_rooms first
@@ -423,12 +431,24 @@ async def delete_all_cancelled_reservations(
         # Then delete all cancelled reservations
         db.table('reservations').delete().eq('status', 'cancelled').execute()
         
+        # Verify the deletion actually happened
+        verify = db.table('reservations').select('id').eq('status', 'cancelled').execute()
+        deleted_count = initial_count - len(verify.data)
+        
+        if deleted_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No se pudieron eliminar las reservaciones. Es necesario agregar políticas RLS de DELETE en Supabase. Ejecute el script SQL proporcionado en la documentación."
+            )
+        
         return {
             "message": f"Se eliminaron {deleted_count} reservaciones canceladas permanentemente",
             "deleted_count": deleted_count,
             "success": True
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error deleting all cancelled reservations: {str(e)}")
         raise HTTPException(
