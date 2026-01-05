@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Calendar } from '../ui/calendar';
 import { ArrowLeft, Calendar as CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 
@@ -12,6 +12,29 @@ export const DateRangeSelector = ({ serviceType, onSelect, onBack, roomIds, prel
   
   // Use preloaded dates directly - no need to fetch again
   const unavailableDates = preloadedUnavailableDates;
+
+  // For hospedaje: find the first unavailable date after check-in
+  // This will be the maximum allowed check-out date
+  const maxCheckoutDate = useMemo(() => {
+    if (serviceType !== 'hospedaje' || !dateRange.from || unavailableDates.length === 0) {
+      return null;
+    }
+    
+    const checkInStr = format(dateRange.from, 'yyyy-MM-dd');
+    
+    // Sort unavailable dates and find the first one after check-in
+    const sortedUnavailable = [...unavailableDates].sort();
+    const firstBlockedAfterCheckin = sortedUnavailable.find(d => d > checkInStr);
+    
+    if (firstBlockedAfterCheckin) {
+      // The checkout can be ON the blocked date (guest leaves that day)
+      // So max checkout is the day AFTER the first blocked date
+      const blockedDate = new Date(firstBlockedAfterCheckin + 'T00:00:00');
+      return addDays(blockedDate, 1);
+    }
+    
+    return null;
+  }, [dateRange.from, unavailableDates, serviceType]);
 
   const handleContinue = () => {
     if (!dateRange.from) {
@@ -39,9 +62,26 @@ export const DateRangeSelector = ({ serviceType, onSelect, onBack, roomIds, prel
     // Disable past dates
     if (date < today) return true;
     
-    // Disable unavailable dates for both hospedaje and fullday
+    const dateStr = format(date, 'yyyy-MM-dd');
+    
+    // For hospedaje mode with a selected check-in date
+    if (serviceType === 'hospedaje' && dateRange.from) {
+      const checkInStr = format(dateRange.from, 'yyyy-MM-dd');
+      
+      // If this date is AFTER our check-in date, it could be a checkout date
+      if (dateStr > checkInStr) {
+        // Allow selecting dates up to and including the first blocked date as checkout
+        // But disable dates AFTER the first blocked date
+        if (maxCheckoutDate) {
+          return date >= maxCheckoutDate;
+        }
+        // No blocked dates ahead, allow all future dates
+        return false;
+      }
+    }
+    
+    // For check-in selection or fullday: disable unavailable dates
     if (unavailableDates.length > 0) {
-      const dateStr = format(date, 'yyyy-MM-dd');
       return unavailableDates.includes(dateStr);
     }
     
