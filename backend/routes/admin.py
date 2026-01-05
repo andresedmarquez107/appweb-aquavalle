@@ -357,6 +357,86 @@ async def cancel_reservation(
         )
 
 
+@router.delete("/reservations/{reservation_id}/permanent")
+async def permanently_delete_reservation(
+    reservation_id: str,
+    admin: dict = Depends(get_current_admin)
+):
+    """Permanently delete a cancelled reservation from the database"""
+    db = get_db()
+    
+    try:
+        # First check if the reservation exists and is cancelled
+        reservation = db.table('reservations').select('*').eq('id', reservation_id).execute()
+        
+        if not reservation.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Reservación no encontrada"
+            )
+        
+        if reservation.data[0]['status'] != 'cancelled':
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Solo se pueden eliminar permanentemente las reservaciones canceladas"
+            )
+        
+        # Delete related records in reservation_rooms first
+        db.table('reservation_rooms').delete().eq('reservation_id', reservation_id).execute()
+        
+        # Then delete the reservation
+        result = db.table('reservations').delete().eq('id', reservation_id).execute()
+        
+        return {"message": "Reservación eliminada permanentemente", "success": True}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error permanently deleting reservation: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error eliminando reservación permanentemente"
+        )
+
+
+@router.delete("/reservations/cancelled/all")
+async def delete_all_cancelled_reservations(
+    admin: dict = Depends(get_current_admin)
+):
+    """Permanently delete ALL cancelled reservations from the database"""
+    db = get_db()
+    
+    try:
+        # Get all cancelled reservations
+        cancelled = db.table('reservations').select('id').eq('status', 'cancelled').execute()
+        
+        if not cancelled.data:
+            return {"message": "No hay reservaciones canceladas para eliminar", "deleted_count": 0}
+        
+        deleted_count = len(cancelled.data)
+        reservation_ids = [r['id'] for r in cancelled.data]
+        
+        # Delete related records in reservation_rooms first
+        for res_id in reservation_ids:
+            db.table('reservation_rooms').delete().eq('reservation_id', res_id).execute()
+        
+        # Then delete all cancelled reservations
+        db.table('reservations').delete().eq('status', 'cancelled').execute()
+        
+        return {
+            "message": f"Se eliminaron {deleted_count} reservaciones canceladas permanentemente",
+            "deleted_count": deleted_count,
+            "success": True
+        }
+        
+    except Exception as e:
+        logger.error(f"Error deleting all cancelled reservations: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error eliminando reservaciones canceladas"
+        )
+
+
 # =====================================================
 # AVAILABILITY BLOCKS ENDPOINTS
 # =====================================================

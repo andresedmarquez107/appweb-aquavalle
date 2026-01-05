@@ -171,6 +171,22 @@ export const adminAPI = {
     return response.data;
   },
 
+  permanentlyDeleteReservation: async (id) => {
+    const token = localStorage.getItem('adminToken');
+    const response = await axios.delete(`${API}/admin/reservations/${id}/permanent`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+
+  deleteAllCancelledReservations: async () => {
+    const token = localStorage.getItem('adminToken');
+    const response = await axios.delete(`${API}/admin/reservations/cancelled/all`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+
   // Availability Blocks
   getBlocks: async () => {
     const token = localStorage.getItem('adminToken');
