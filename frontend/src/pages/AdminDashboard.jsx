@@ -265,6 +265,22 @@ export const AdminDashboard = () => {
                 <RefreshCw size={16} className={`mr-1 ${loading ? 'animate-spin' : ''}`} /> Actualizar
               </Button>
             </div>
+            <div className="flex gap-2 mt-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleDeleteAllCancelled}
+                disabled={deletingCancelled}
+                className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                {deletingCancelled ? (
+                  <Loader2 size={16} className="mr-1 animate-spin" />
+                ) : (
+                  <Trash size={16} className="mr-1" />
+                )}
+                Limpiar Canceladas
+              </Button>
+            </div>
           </div>
         </div>
       </header>
