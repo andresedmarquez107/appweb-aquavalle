@@ -223,6 +223,20 @@ export const AdminDashboard = () => {
               <Button variant="outline" size="sm" onClick={() => navigate('/admin/blocks')}>
                 <CalendarOff size={16} className="mr-1" /> Bloqueos
               </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleDeleteAllCancelled}
+                disabled={deletingCancelled}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                {deletingCancelled ? (
+                  <Loader2 size={16} className="mr-1 animate-spin" />
+                ) : (
+                  <Trash size={16} className="mr-1" />
+                )}
+                Limpiar Canceladas
+              </Button>
               <Button variant="outline" size="sm" onClick={loadData} disabled={loading}>
                 <RefreshCw size={16} className={`mr-1 ${loading ? 'animate-spin' : ''}`} /> Actualizar
               </Button>
