@@ -134,6 +134,38 @@ export const AdminDashboard = () => {
     }
   };
 
+  const handlePermanentDelete = async (id) => {
+    if (!window.confirm('¿Estás seguro de eliminar PERMANENTEMENTE esta reservación? Esta acción no se puede deshacer.')) return;
+    try {
+      await adminAPI.permanentlyDeleteReservation(id);
+      toast.success('Reservación eliminada permanentemente');
+      loadData();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Error eliminando reservación');
+    }
+  };
+
+  const handleDeleteAllCancelled = async () => {
+    const cancelledCount = reservations.filter(r => r.status === 'cancelled').length;
+    if (cancelledCount === 0) {
+      toast.info('No hay reservaciones canceladas para eliminar');
+      return;
+    }
+    
+    if (!window.confirm(`¿Estás seguro de eliminar PERMANENTEMENTE ${cancelledCount} reservación(es) cancelada(s)? Esta acción no se puede deshacer.`)) return;
+    
+    setDeletingCancelled(true);
+    try {
+      const result = await adminAPI.deleteAllCancelledReservations();
+      toast.success(result.message);
+      loadData();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Error eliminando reservaciones');
+    } finally {
+      setDeletingCancelled(false);
+    }
+  };
+
   const filteredReservations = reservations.filter(r => {
     if (statusFilter !== 'all' && r.status !== statusFilter) return false;
     if (typeFilter !== 'all' && r.reservation_type !== typeFilter) return false;
