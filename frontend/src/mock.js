@@ -50,6 +50,10 @@ export const mockReservations = [
 ];
 
 export const facilityImages = [
+  'https://customer-assets.emergentagent.com/job_valley-cabins/artifacts/wo7fptz2_WhatsApp%20Image%202025-12-09%20at%208.00.01%20PM.jpeg',
+  'https://customer-assets.emergentagent.com/job_valley-cabins/artifacts/rr6x5djj_WhatsApp%20Image%202025-12-09%20at%208.00.01%20PM%20%281%29.jpeg',
+  'https://customer-assets.emergentagent.com/job_valley-cabins/artifacts/fdso9lve_WhatsApp%20Image%202025-12-09%20at%208.00.01%20PM%20%282%29.jpeg',
+  'https://customer-assets.emergentagent.com/job_valley-cabins/artifacts/16fe3e80_WhatsApp%20Image%202025-12-09%20at%208.00.01%20PM%20%283%29.jpeg',
   'https://customer-assets.emergentagent.com/job_2840ba5b-8596-4c1b-ad95-916d227ab47a/artifacts/z960xfal_img1.jpeg',
   'https://customer-assets.emergentagent.com/job_2840ba5b-8596-4c1b-ad95-916d227ab47a/artifacts/3egjoasy_img2.jpeg',
   'https://customer-assets.emergentagent.com/job_2840ba5b-8596-4c1b-ad95-916d227ab47a/artifacts/ctygldq4_img3.jpeg',
