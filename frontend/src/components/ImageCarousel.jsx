@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react';
 import { Button } from './ui/button';
 import { facilityImages } from '../mock';
 
 export const ImageCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev + 1) % facilityImages.length);
@@ -18,6 +19,26 @@ export const ImageCarousel = () => {
     setCurrentIndex(index);
   };
 
+  const openLightbox = () => {
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+  };
+
+  // Handle keyboard navigation in lightbox
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!lightboxOpen) return;
+      if (e.key === 'ArrowLeft') prevSlide();
+      if (e.key === 'ArrowRight') nextSlide();
+      if (e.key === 'Escape') closeLightbox();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lightboxOpen]);
+
   return (
     <section className="py-20 bg-stone-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,7 +51,10 @@ export const ImageCarousel = () => {
 
         <div className="relative max-w-5xl mx-auto">
           {/* Main image container */}
-          <div className="relative h-96 md:h-[500px] overflow-hidden rounded-2xl shadow-2xl">
+          <div 
+            className="relative h-96 md:h-[500px] overflow-hidden rounded-2xl shadow-2xl cursor-pointer group"
+            onClick={openLightbox}
+          >
             <img
               src={facilityImages[currentIndex]}
               alt={`Instalación ${currentIndex + 1}`}
@@ -39,10 +63,17 @@ export const ImageCarousel = () => {
             
             {/* Overlay gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-stone-900/40 to-transparent pointer-events-none"></div>
+            
+            {/* Zoom indicator on hover */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center pointer-events-none">
+              <div className="bg-white/90 rounded-full p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg">
+                <ZoomIn size={32} className="text-stone-800" />
+              </div>
+            </div>
 
             {/* Navigation buttons */}
             <Button
-              onClick={prevSlide}
+              onClick={(e) => { e.stopPropagation(); prevSlide(); }}
               className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-stone-800 rounded-full w-12 h-12 p-0 shadow-lg"
               aria-label="Imagen anterior"
             >
@@ -50,7 +81,7 @@ export const ImageCarousel = () => {
             </Button>
             
             <Button
-              onClick={nextSlide}
+              onClick={(e) => { e.stopPropagation(); nextSlide(); }}
               className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-stone-800 rounded-full w-12 h-12 p-0 shadow-lg"
               aria-label="Siguiente imagen"
             >
@@ -60,6 +91,11 @@ export const ImageCarousel = () => {
             {/* Counter */}
             <div className="absolute bottom-4 right-4 bg-black/70 text-white px-4 py-2 rounded-full text-sm font-medium">
               {currentIndex + 1} / {facilityImages.length}
+            </div>
+            
+            {/* Click to expand hint */}
+            <div className="absolute bottom-4 left-4 bg-black/70 text-white px-4 py-2 rounded-full text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+              Click para ampliar
             </div>
           </div>
 
@@ -101,6 +137,60 @@ export const ImageCarousel = () => {
           </div>
         </div>
       </div>
+
+      {/* Fullscreen Lightbox */}
+      {lightboxOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+          onClick={closeLightbox}
+        >
+          {/* Close button */}
+          <button 
+            onClick={closeLightbox}
+            className="absolute right-4 top-4 z-50 bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors"
+          >
+            <X size={24} className="text-white" />
+          </button>
+
+          {/* Previous button */}
+          <button 
+            onClick={(e) => { e.stopPropagation(); prevSlide(); }}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-50 bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors"
+          >
+            <ChevronLeft size={32} className="text-white" />
+          </button>
+
+          {/* Next button */}
+          <button 
+            onClick={(e) => { e.stopPropagation(); nextSlide(); }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-50 bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors"
+          >
+            <ChevronRight size={32} className="text-white" />
+          </button>
+
+          {/* Image */}
+          <div 
+            className="max-w-[90vw] max-h-[90vh] flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img 
+              src={facilityImages[currentIndex]}
+              alt={`Vista ampliada ${currentIndex + 1}`}
+              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+            />
+          </div>
+
+          {/* Image counter */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm">
+            {currentIndex + 1} / {facilityImages.length}
+          </div>
+          
+          {/* Keyboard hint */}
+          <div className="absolute bottom-4 right-4 text-white/50 text-xs hidden md:block">
+            Usa ← → para navegar · ESC para cerrar
+          </div>
+        </div>
+      )}
     </section>
   );
 };
