@@ -58,7 +58,9 @@ export const facilityImages = [
   'https://customer-assets.emergentagent.com/job_2840ba5b-8596-4c1b-ad95-916d227ab47a/artifacts/3egjoasy_img2.jpeg',
   'https://customer-assets.emergentagent.com/job_2840ba5b-8596-4c1b-ad95-916d227ab47a/artifacts/ctygldq4_img3.jpeg',
   'https://customer-assets.emergentagent.com/job_2840ba5b-8596-4c1b-ad95-916d227ab47a/artifacts/68mwos0l_img4.jpeg',
-  'https://customer-assets.emergentagent.com/job_2840ba5b-8596-4c1b-ad95-916d227ab47a/artifacts/i3jkqecs_img5.jpeg'
+  'https://customer-assets.emergentagent.com/job_2840ba5b-8596-4c1b-ad95-916d227ab47a/artifacts/i3jkqecs_img5.jpeg',
+  'https://customer-assets.emergentagent.com/job_2840ba5b-8596-4c1b-ad95-916d227ab47a/artifacts/n1ztw99m_WhatsApp%20Image%202025-12-09%20at%208.00.01%20PM%20%284%29.jpeg',
+  'https://customer-assets.emergentagent.com/job_2840ba5b-8596-4c1b-ad95-916d227ab47a/artifacts/12l9a9fy_WhatsApp%20Image%202025-12-09%20at%208.00.01%20PM%20%285%29.jpeg'
 ];
 
 export const rules = [
