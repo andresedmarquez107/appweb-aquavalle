@@ -585,12 +585,23 @@ export const AdminDashboard = () => {
                     >
                       <Edit size={14} className="mr-1" /> Editar
                     </Button>
-                    {res.status !== 'cancelled' && (
+                    {res.status !== 'cancelled' ? (
                       <Button
                         variant="outline"
                         size="sm"
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         onClick={() => handleCancel(res.id)}
+                        title="Cancelar"
+                      >
+                        <XCircle size={14} />
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handlePermanentDelete(res.id)}
+                        title="Eliminar permanentemente"
                       >
                         <Trash2 size={14} />
                       </Button>
