@@ -151,7 +151,7 @@ export const ContactPage = () => {
           <CardContent>
             <div className="aspect-video w-full bg-stone-200 rounded-lg overflow-hidden">
               <iframe
-                src="https://maps.google.com/?q=Cabañas+AquaValle+San+Rafael+de+Tabay+Mérida"
+                src="<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3944.5658797611522!2d-71.05960412522421!3d8.63760639140896!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e648382c08259b3%3A0x69f2906ba137775b!2sCaba%C3%B1as%20AquaValle!5e0!3m2!1ses-419!2sus!4v1767987031283!5m2!1ses-419!2sus" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
