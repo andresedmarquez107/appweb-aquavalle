@@ -43,7 +43,8 @@ app.include_router(api_router)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["*"],
+    allow_origins=[""http://localhost:3000", 
+    "https://appweb-aquavalle-1ccj0w6v7-andres-marquezs-projects-8503559d.vercel.app"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
