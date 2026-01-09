@@ -44,48 +44,60 @@ export const Rooms = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
-          {rooms.map((room, index) => (
-            <Card key={room.id} className="overflow-hidden border-2 border-stone-200 hover:border-emerald-500 transition-all duration-300 hover:shadow-xl">
-              <div className="relative h-64 overflow-hidden">
-                <img 
-                  src={room.images[0]} 
-                  alt={room.name}
-                  className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute top-4 right-4">
-                  <Badge className={`${index === 0 ? 'bg-amber-600' : 'bg-emerald-700'} text-white px-4 py-2 text-lg`}>
-                    €{room.price_per_night}/noche
-                  </Badge>
-                </div>
-              </div>
-              
-              <CardHeader>
-                <CardTitle className="text-2xl text-stone-800">Habitación {room.name}</CardTitle>
-                <CardDescription className="flex items-center gap-2 text-lg">
-                  <Users className="text-emerald-600" size={20} />
-                  <span>Capacidad: {room.capacity} personas</span>
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent>
-                <p className="text-stone-600 mb-4">{room.description}</p>
-                
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-stone-800 mb-3">Características:</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    {room.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-center gap-2 text-sm text-stone-700">
-                        <span className="text-emerald-600">
-                          {iconMap[feature] || <Users size={18} />}
-                        </span>
-                        <span>{feature}</span>
-                      </div>
-                    ))}
+          {/* --- BLOQUE SEGURO INICIO --- */}
+          {Array.isArray(rooms) && rooms.length > 0 ? (
+            rooms.map((room, index) => (
+              <Card key={room.id} className="overflow-hidden border-2 border-stone-200 hover:border-emerald-500 transition-all duration-300 hover:shadow-xl">
+                <div className="relative h-64 overflow-hidden">
+                  <img 
+                    src={room.images ? room.images[0] : ''} 
+                    alt={room.name}
+                    className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute top-4 right-4">
+                    <Badge className={`${index === 0 ? 'bg-amber-600' : 'bg-emerald-700'} text-white px-4 py-2 text-lg`}>
+                      €{room.price_per_night}/noche
+                    </Badge>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                
+                <CardHeader>
+                  <CardTitle className="text-2xl text-stone-800">Habitación {room.name}</CardTitle>
+                  <CardDescription className="flex items-center gap-2 text-lg">
+                    <Users className="text-emerald-600" size={20} />
+                    <span>Capacidad: {room.capacity} personas</span>
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent>
+                  <p className="text-stone-600 mb-4">{room.description}</p>
+                  
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-stone-800 mb-3">Características:</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Agregamos seguridad extra aquí también por si features viene vacío */}
+                      {Array.isArray(room.features) && room.features.map((feature, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-sm text-stone-700">
+                          <span className="text-emerald-600">
+                            {iconMap[feature] || <Users size={18} />}
+                          </span>
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <div className="col-span-2 text-center p-12 border-2 border-dashed border-stone-300 rounded-lg">
+              <p className="text-xl text-stone-500 mb-2">Cargando habitaciones...</p>
+              <p className="text-xs text-stone-400">Si esto tarda mucho, hay un error de conexión.</p>
+              {/* ESTE LOG ES EL IMPORTANTE PARA VER QUÉ PASA */}
+              {console.log("DEBUG - Datos recibidos en rooms:", rooms)}
+            </div>
+          )}
+          {/* --- BLOQUE SEGURO FIN --- */}
         </div>
       </div>
     </section>
