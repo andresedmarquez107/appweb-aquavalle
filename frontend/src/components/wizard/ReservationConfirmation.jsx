@@ -177,6 +177,20 @@ export const ReservationConfirmation = ({ data, onClose }) => {
         <h3 className="text-2xl font-bold text-stone-800 mb-2">¡Reserva Registrada!</h3>
         <p className="text-stone-600">Revisa los detalles y confirma por WhatsApp</p>
       </div>
+       {/* WhatsApp Confirmation Section */}
+      <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-6 mb-4">
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center gap-2 bg-amber-200 text-amber-800 px-4 py-2 rounded-full font-semibold text-sm mb-3">
+            <span className="animate-pulse">⚠️</span>
+            IMPORTANTE
+          </div>
+          <h4 className="text-lg font-bold text-amber-900 mb-2">
+            Tu reserva aún no está confirmada
+          </h4>
+          <p className="text-amber-800 text-sm">
+            Para completar tu reserva, debes enviar los datos por WhatsApp presionando el botón de abajo
+          </p>
+        </div>
 
       <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-6 mb-6">
         {/* Service type */}
@@ -262,20 +276,6 @@ export const ReservationConfirmation = ({ data, onClose }) => {
         </div>
       </Card>
 
-      {/* WhatsApp Confirmation Section */}
-      <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-6 mb-4">
-        <div className="text-center mb-4">
-          <div className="inline-flex items-center gap-2 bg-amber-200 text-amber-800 px-4 py-2 rounded-full font-semibold text-sm mb-3">
-            <span className="animate-pulse">⚠️</span>
-            IMPORTANTE
-          </div>
-          <h4 className="text-lg font-bold text-amber-900 mb-2">
-            Tu reserva aún no está confirmada
-          </h4>
-          <p className="text-amber-800 text-sm">
-            Para completar tu reserva, debes enviar los datos por WhatsApp presionando el botón de abajo
-          </p>
-        </div>
 
         {/* Flechas animadas apuntando al botón */}
         <div className="flex justify-center gap-4 mb-4 text-green-600">
