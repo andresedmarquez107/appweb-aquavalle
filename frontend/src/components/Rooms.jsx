@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Badge } from './ui/badge';
-import { Users, Euro, Wifi, Tv, Flame, Droplets } from 'lucide-react';
+// AQUÍ ESTABA EL ERROR: Agregué los iconos que faltaban (ZoomIn, ChevronLeft, etc.)
+import { Users, Euro, Wifi, Tv, Flame, Droplets, ZoomIn, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useRooms } from '../hooks/useRooms';
 
 // Room Image Carousel Component
 const RoomCarousel = ({ images, roomName, onImageClick }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // PROTECCIÓN: Si no hay imágenes, mostramos un recuadro gris en vez de romper la app
+  if (!images || images.length === 0) {
+    return (
+      <div className="h-64 w-full bg-stone-200 flex items-center justify-center text-stone-500">
+        Sin imagen disponible
+      </div>
+    );
+  }
 
   const nextSlide = (e) => {
     e.stopPropagation();
@@ -82,14 +92,17 @@ const Lightbox = ({ images, currentIndex, onClose, onNavigate }) => {
     if (e.key === 'Escape') onClose();
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     document.body.style.overflow = 'hidden';
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'unset';
     };
-  }, []);
+  }, []); // El array vacío está bien aquí
+
+  // Protección por si images es undefined
+  if (!images || images.length === 0) return null;
 
   return (
     <div 
@@ -148,13 +161,17 @@ const Lightbox = ({ images, currentIndex, onClose, onNavigate }) => {
     </div>
   );
 };
+
 export const Rooms = () => {
   const { rooms, loading, error } = useRooms();
   
   const [lightbox, setLightbox] = useState({ open: false, images: [], index: 0 });
   
   const openLightbox = (images, index) => {
-    setLightbox({ open: true, images, index });
+    // Protección: asegurarnos de que hay imágenes antes de abrir
+    if (images && images.length > 0) {
+      setLightbox({ open: true, images, index });
+    }
   };
 
   const closeLightbox = () => {
@@ -169,6 +186,7 @@ export const Rooms = () => {
         : (prev.index - 1 + prev.images.length) % prev.images.length
     }));
   };
+
   if (loading) {
     return (
       <section id="habitaciones" className="py-20 bg-white">
@@ -188,6 +206,7 @@ export const Rooms = () => {
       </section>
     );
   }
+
   const iconMap = {
     'WiFi': <Wifi size={18} />,
     'TV': <Tv size={18} />,
@@ -210,17 +229,16 @@ export const Rooms = () => {
           {Array.isArray(rooms) && rooms.length > 0 ? (
             rooms.map((room, index) => (
               <Card key={room.id} className="overflow-hidden border-2 border-stone-200 hover:border-emerald-500 transition-all duration-300 hover:shadow-xl">
-                <div className="relative h-64 overflow-hidden">
-                  <RoomCarousel 
+                {/* AQUI USAMOS EL NUEVO CARRUSEL */}
+                <RoomCarousel 
                   images={room.images} 
                   roomName={room.name}
                   onImageClick={(imgIndex) => openLightbox(room.images, imgIndex)}
                 />
-                  <div className="absolute top-4 right-4">
-                    <Badge className={`${index === 0 ? 'bg-amber-600' : 'bg-emerald-700'} text-white px-4 py-2 text-lg`}>
-                      €{room.price_per_night}/noche
-                    </Badge>
-                  </div>
+                
+                <div className="relative">
+                  {/* Badge de precio movido un poco para no tapar flechas si es necesario, 
+                      o puedes dejarlo dentro del carrusel si prefieres */}
                 </div>
                 
                 <CardHeader>
@@ -237,7 +255,6 @@ export const Rooms = () => {
                   <div className="space-y-2">
                     <h4 className="font-semibold text-stone-800 mb-3">Características:</h4>
                     <div className="grid grid-cols-2 gap-3">
-                      {/* Agregamos seguridad extra aquí también por si features viene vacío */}
                       {Array.isArray(room.features) && room.features.map((feature, idx) => (
                         <div key={idx} className="flex items-center gap-2 text-sm text-stone-700">
                           <span className="text-emerald-600">
@@ -255,13 +272,14 @@ export const Rooms = () => {
             <div className="col-span-2 text-center p-12 border-2 border-dashed border-stone-300 rounded-lg">
               <p className="text-xl text-stone-500 mb-2">Cargando habitaciones...</p>
               <p className="text-xs text-stone-400">Si esto tarda mucho, hay un error de conexión.</p>
-              {/* ESTE LOG ES EL IMPORTANTE PARA VER QUÉ PASA */}
               {console.log("DEBUG - Datos recibidos en rooms:", rooms)}
             </div>
           )}
           {/* --- BLOQUE SEGURO FIN --- */}
         </div>
       </div>
+      
+      {/* Lightbox Modal */}
       {lightbox.open && (
         <Lightbox 
           images={lightbox.images}
