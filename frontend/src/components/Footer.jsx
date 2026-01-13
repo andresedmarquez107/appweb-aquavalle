@@ -26,7 +26,7 @@ export const Footer = () => {
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="text-emerald-400 flex-shrink-0" size={18} />
-                <a href="tel:+584247739434" className="text-stone-300 hover:text-emerald-400 transition-colors text-sm">
+                <a href="https://wa.me/584247739434?text=Hola%20Cabañas%20AquaValle,%20quisiera%20más%20información" className="text-stone-300 hover:text-emerald-400 transition-colors text-sm">
                   +58 424 773 9434
                 </a>
               </div>
