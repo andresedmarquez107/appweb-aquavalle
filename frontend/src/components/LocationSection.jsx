@@ -15,7 +15,7 @@ export const LocationSection = () => {
             </div>
             
             <h2 className="text-4xl font-bold text-stone-800 leading-tight">
-              En el Corazón del Valle
+              En La Capea Baja
             </h2>
             
             <p className="text-xl text-stone-600 leading-relaxed">
