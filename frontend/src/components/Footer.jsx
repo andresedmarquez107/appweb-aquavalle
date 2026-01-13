@@ -32,7 +32,7 @@ export const Footer = () => {
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="text-emerald-400 flex-shrink-0" size={18} />
-                <span className="text-stone-300 text-sm">info@aquavalle.com</span>
+                <span className="text-stone-300 text-sm">cabanasaquavalle@gmail.com</span>
               </div>
             </div>
           </div>
