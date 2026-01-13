@@ -64,11 +64,11 @@ export const ContactPage = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-stone-800 mb-1">Teléfono</h3>
-                  <a href="tel:+584247739434" className="text-stone-600 hover:text-emerald-700">
+                  <a href="https://wa.me/584247739434?text=Hola%20Cabañas%20AquaValle,%20quisiera%20más%20información" className="text-stone-600 hover:text-emerald-700">
                     +58 424 773 9434
                   </a>
                   <p className="text-sm text-stone-500 mt-1">
-                    También disponible por WhatsApp
+                    WhatsApp
                   </p>
                 </div>
               </div>
