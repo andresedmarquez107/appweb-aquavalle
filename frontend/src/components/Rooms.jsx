@@ -4,9 +4,171 @@ import { Badge } from './ui/badge';
 import { Users, Euro, Wifi, Tv, Flame, Droplets } from 'lucide-react';
 import { useRooms } from '../hooks/useRooms';
 
+// Room Image Carousel Component
+const RoomCarousel = ({ images, roomName, onImageClick }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const nextSlide = (e) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevSlide = (e) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  return (
+    <div className="relative h-64 overflow-hidden group">
+      <img 
+        src={images[currentIndex]} 
+        alt={`${roomName} - Imagen ${currentIndex + 1}`}
+        className="w-full h-full object-cover cursor-pointer transform group-hover:scale-105 transition-transform duration-500"
+        onClick={() => onImageClick(currentIndex)}
+      />
+      
+      {/* Zoom indicator */}
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center pointer-events-none">
+        <div className="bg-white/90 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <ZoomIn size={20} className="text-stone-800" />
+        </div>
+      </div>
+
+      {/* Navigation arrows - only show if more than 1 image */}
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={prevSlide}
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-stone-800 rounded-full w-8 h-8 flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          
+          <button
+            onClick={nextSlide}
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-stone-800 rounded-full w-8 h-8 flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <ChevronRight size={20} />
+          </button>
+
+          {/* Dots indicator */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            {images.map((_, index) => (
+              <button
+                key={index}
+                onClick={(e) => { e.stopPropagation(); setCurrentIndex(index); }}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  index === currentIndex ? 'bg-white w-4' : 'bg-white/60 hover:bg-white/80'
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* Counter */}
+          <div className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-1 rounded text-xs">
+            {currentIndex + 1} / {images.length}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+// Lightbox Component
+const Lightbox = ({ images, currentIndex, onClose, onNavigate }) => {
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowLeft') onNavigate('prev');
+    if (e.key === 'ArrowRight') onNavigate('next');
+    if (e.key === 'Escape') onClose();
+  };
+
+  React.useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
+  return (
+    <div 
+      className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+      onClick={onClose}
+    >
+      {/* Close button */}
+      <button 
+        onClick={onClose}
+        className="absolute right-4 top-4 z-50 bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors"
+      >
+        <X size={24} className="text-white" />
+      </button>
+
+      {/* Previous button */}
+      {images.length > 1 && (
+        <button 
+          onClick={(e) => { e.stopPropagation(); onNavigate('prev'); }}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-50 bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors"
+        >
+          <ChevronLeft size={32} className="text-white" />
+        </button>
+      )}
+
+      {/* Next button */}
+      {images.length > 1 && (
+        <button 
+          onClick={(e) => { e.stopPropagation(); onNavigate('next'); }}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-50 bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors"
+        >
+          <ChevronRight size={32} className="text-white" />
+        </button>
+      )}
+
+      {/* Image */}
+      <div 
+        className="max-w-[90vw] max-h-[90vh] flex items-center justify-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img 
+          src={images[currentIndex]}
+          alt={`Vista ampliada ${currentIndex + 1}`}
+          className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+        />
+      </div>
+
+      {/* Image counter */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm">
+        {currentIndex + 1} / {images.length}
+      </div>
+      
+      {/* Keyboard hint */}
+      <div className="absolute bottom-4 right-4 text-white/50 text-xs hidden md:block">
+        Usa ← → para navegar · ESC para cerrar
+      </div>
+    </div>
+  );
+};
 export const Rooms = () => {
   const { rooms, loading, error } = useRooms();
   
+  const [lightbox, setLightbox] = useState({ open: false, images: [], index: 0 });
+  
+  const openLightbox = (images, index) => {
+    setLightbox({ open: true, images, index });
+  };
+
+  const closeLightbox = () => {
+    setLightbox({ open: false, images: [], index: 0 });
+  };
+
+  const navigateLightbox = (direction) => {
+    setLightbox(prev => ({
+      ...prev,
+      index: direction === 'next' 
+        ? (prev.index + 1) % prev.images.length
+        : (prev.index - 1 + prev.images.length) % prev.images.length
+    }));
+  };
   if (loading) {
     return (
       <section id="habitaciones" className="py-20 bg-white">
@@ -100,6 +262,14 @@ export const Rooms = () => {
           {/* --- BLOQUE SEGURO FIN --- */}
         </div>
       </div>
+      {lightbox.open && (
+        <Lightbox 
+          images={lightbox.images}
+          currentIndex={lightbox.index}
+          onClose={closeLightbox}
+          onNavigate={navigateLightbox}
+        />
+      )}
     </section>
   );
 };
