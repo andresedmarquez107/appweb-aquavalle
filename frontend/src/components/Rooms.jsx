@@ -211,11 +211,11 @@ export const Rooms = () => {
             rooms.map((room, index) => (
               <Card key={room.id} className="overflow-hidden border-2 border-stone-200 hover:border-emerald-500 transition-all duration-300 hover:shadow-xl">
                 <div className="relative h-64 overflow-hidden">
-                  <img 
-                    src={room.images ? room.images[0] : ''} 
-                    alt={room.name}
-                    className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                  />
+                  <RoomCarousel 
+                  images={room.images} 
+                  roomName={room.name}
+                  onImageClick={(imgIndex) => openLightbox(room.images, imgIndex)}
+                />
                   <div className="absolute top-4 right-4">
                     <Badge className={`${index === 0 ? 'bg-amber-600' : 'bg-emerald-700'} text-white px-4 py-2 text-lg`}>
                       €{room.price_per_night}/noche
