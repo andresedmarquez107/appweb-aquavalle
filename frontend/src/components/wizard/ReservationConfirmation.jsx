@@ -190,6 +190,24 @@ export const ReservationConfirmation = ({ data, onClose }) => {
           <p className="text-amber-800 text-sm">
             Para completar tu reserva, debes enviar los datos por WhatsApp presionando el botón de abajo
           </p>
+          {/* Flechas animadas apuntando al botón */}
+        <div className="flex justify-center gap-4 mb-4 text-green-600">
+          <span className="animate-bounce text-2xl">↓</span>
+          <span className="animate-bounce text-2xl" style={{animationDelay: '0.1s'}}>↓</span>
+          <span className="animate-bounce text-2xl" style={{animationDelay: '0.2s'}}>↓</span>
+        </div>
+
+        <Button
+          onClick={handleWhatsAppRedirect}
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
+        >
+          <MessageCircle className="mr-2" size={24} />
+          Confirmar Reserva vía WhatsApp
+        </Button>
+
+        <p className="text-center text-xs text-amber-700 mt-3">
+          Al presionar el botón se abrirá WhatsApp con los datos de tu reserva
+        </p>
         </div>
 
       <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-6 mb-6">
@@ -277,24 +295,7 @@ export const ReservationConfirmation = ({ data, onClose }) => {
       </Card>
 
 
-        {/* Flechas animadas apuntando al botón */}
-        <div className="flex justify-center gap-4 mb-4 text-green-600">
-          <span className="animate-bounce text-2xl">↓</span>
-          <span className="animate-bounce text-2xl" style={{animationDelay: '0.1s'}}>↓</span>
-          <span className="animate-bounce text-2xl" style={{animationDelay: '0.2s'}}>↓</span>
-        </div>
-
-        <Button
-          onClick={handleWhatsAppRedirect}
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
-        >
-          <MessageCircle className="mr-2" size={24} />
-          Confirmar Reserva vía WhatsApp
-        </Button>
-
-        <p className="text-center text-xs text-amber-700 mt-3">
-          Al presionar el botón se abrirá WhatsApp con los datos de tu reserva
-        </p>
+        
       </div>
 
       {/* Botón alternativo */}
