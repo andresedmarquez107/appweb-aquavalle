@@ -84,9 +84,9 @@ export const ReservationWizard = ({ isOpen, onClose }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-stone-800">
+          <DialogTitle className="text-lg sm:text-2xl font-bold text-stone-800">
             {step === 1 && 'Selecciona tu Servicio'}
             {step === 2 && reservationData.serviceType === 'hospedaje' && 'Elige tu Habitación'}
             {step === 2 && reservationData.serviceType === 'fullday' && 'Número de Personas'}
@@ -96,7 +96,7 @@ export const ReservationWizard = ({ isOpen, onClose }) => {
           </DialogTitle>
         </DialogHeader>
 
-        <div className="mt-4">
+        <div className="mt-2 sm:mt-4">
           {step === 1 && <ServiceSelector onSelect={handleServiceSelect} />}
           
           {step === 2 && reservationData.serviceType === 'hospedaje' && (

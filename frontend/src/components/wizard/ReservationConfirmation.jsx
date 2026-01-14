@@ -14,11 +14,9 @@ export const ReservationConfirmation = ({ data, onClose }) => {
   const [roomsData, setRoomsData] = useState([]);
   const [error, setError] = useState(null);
   
-  // Prevent double execution in StrictMode
   const hasCreatedReservation = useRef(false);
 
   useEffect(() => {
-    // Skip if already created (StrictMode double-run protection)
     if (hasCreatedReservation.current) {
       return;
     }
@@ -28,18 +26,15 @@ export const ReservationConfirmation = ({ data, onClose }) => {
       try {
         setLoading(true);
         
-        // Fetch room details
         const allRooms = await roomsAPI.getAll();
         const selectedRooms = allRooms.filter(r => roomIds.includes(r.id));
         setRoomsData(selectedRooms);
 
-        // Calculate num_guests for hospedaje (sum of room capacities)
         let numGuests = parseInt(guests, 10);
         if (serviceType === 'hospedaje') {
           numGuests = selectedRooms.reduce((sum, room) => sum + room.capacity, 0);
         }
 
-        // Prepare reservation data
         const reservationData = {
           client_name: personalData.name,
           client_document: personalData.idDocument,
@@ -53,43 +48,28 @@ export const ReservationConfirmation = ({ data, onClose }) => {
           notes: null
         };
 
-        console.log('=== SENDING RESERVATION ===');
-        console.log('Data:', JSON.stringify(reservationData, null, 2));
-
-        // Create reservation
         const createdReservation = await reservationsAPI.create(reservationData);
-        console.log('=== RESERVATION CREATED ===');
-        console.log('Response:', createdReservation);
         setReservation(createdReservation);
         toast.success('¡Reserva creada exitosamente!');
       } catch (err) {
-        console.error('=== ERROR CREATING RESERVATION ===');
-        console.error('Full error:', err);
-        console.error('Error response:', err.response);
-        console.error('Error data:', err.response?.data);
+        console.error('Error creating reservation:', err);
         
-        // Extract error message
         let errorMessage = 'Error desconocido';
         if (err.response?.data) {
           const data = err.response.data;
           if (typeof data.detail === 'string') {
             errorMessage = data.detail;
-            
-            // Translate common errors
             if (errorMessage.includes('Room not available')) {
-              errorMessage = 'La habitación ya está reservada para estas fechas. Por favor selecciona otras fechas.';
+              errorMessage = 'La habitación ya está reservada para estas fechas.';
             } else if (errorMessage.includes('capacity exceeded')) {
               errorMessage = 'Capacidad máxima excedida para esta fecha.';
             }
           } else if (Array.isArray(data.detail)) {
-            // Validation errors array
             errorMessage = data.detail.map(e => {
               const field = e.loc?.[e.loc.length - 1] || 'campo';
               const msg = e.msg || 'valor inválido';
               return `${field}: ${msg}`;
             }).join(', ');
-          } else if (data.detail) {
-            errorMessage = JSON.stringify(data.detail);
           }
         } else if (err.message) {
           errorMessage = err.message;
@@ -121,39 +101,70 @@ export const ReservationConfirmation = ({ data, onClose }) => {
       client_email: personalData.email
     };
     
-    // Use new function with fallback
     openWhatsApp(whatsappData);
     
-    // Close modal after a short delay
     setTimeout(() => {
       onClose();
     }, 1500);
   };
 
+  const copyMessage = () => {
+    const whatsappData = {
+      reservation_type: serviceType,
+      rooms: roomsData.map(r => r.name),
+      num_guests: guests,
+      total_price: reservation.total_price,
+      check_in_date: format(dateRange.from, 'dd/MM/yyyy', { locale: es }),
+      check_out_date: dateRange.to ? format(dateRange.to, 'dd/MM/yyyy', { locale: es }) : null,
+      client_name: personalData.name,
+      client_document: personalData.idDocument,
+      client_phone: personalData.phone,
+      client_email: personalData.email
+    };
+    
+    let message = `Hola! Quiero confirmar mi reserva:\n\n`;
+    message += `Tipo: ${whatsappData.reservation_type === 'fullday' ? 'Full Day' : 'Hospedaje'}\n`;
+    
+    if (whatsappData.reservation_type === 'hospedaje') {
+      message += `Habitaciones: ${whatsappData.rooms.join(', ')}\n`;
+    } else {
+      message += `Personas: ${whatsappData.num_guests}\n`;
+    }
+    
+    message += `Total: €${whatsappData.total_price}\n`;
+    message += `Entrada: ${whatsappData.check_in_date}\n`;
+    if (whatsappData.check_out_date) {
+      message += `Salida: ${whatsappData.check_out_date}\n`;
+    }
+    message += `\nNombre: ${whatsappData.client_name}\n`;
+    message += `Doc: ${whatsappData.client_document}\n`;
+    message += `Tel: ${whatsappData.client_phone}\n`;
+    if (whatsappData.client_email) {
+      message += `Email: ${whatsappData.client_email}\n`;
+    }
+    
+    navigator.clipboard.writeText(message).then(() => {
+      toast.success('¡Mensaje copiado!');
+    }).catch(() => {
+      toast.error('No se pudo copiar');
+    });
+  };
+
   if (loading) {
     return (
-      <div className="py-12 text-center">
-        <Loader2 className="animate-spin mx-auto mb-4 text-emerald-600" size={48} />
-        <p className="text-stone-600">Creando tu reserva...</p>
+      <div className="py-8 text-center">
+        <Loader2 className="animate-spin mx-auto mb-4 text-emerald-600" size={40} />
+        <p className="text-stone-600 text-sm">Creando tu reserva...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="py-12 text-center">
-        <div className="text-red-600 mb-4 text-xl font-semibold">Error al crear la reserva</div>
-        <div className="text-stone-600 mb-6 max-w-md mx-auto">
-          {typeof error === 'string' ? (
-            <p>{error}</p>
-          ) : (
-            <div className="text-left bg-red-50 p-4 rounded-lg">
-              <p className="font-semibold mb-2">Detalles del error:</p>
-              <pre className="text-xs overflow-auto">{JSON.stringify(error, null, 2)}</pre>
-            </div>
-          )}
-        </div>
-        <Button onClick={onClose} variant="outline">
+      <div className="py-6 text-center">
+        <div className="text-red-600 mb-3 text-lg font-semibold">Error al crear la reserva</div>
+        <p className="text-stone-600 mb-4 text-sm">{error}</p>
+        <Button onClick={onClose} variant="outline" size="sm">
           Cerrar e Intentar de Nuevo
         </Button>
       </div>
@@ -169,198 +180,136 @@ export const ReservationConfirmation = ({ data, onClose }) => {
     : 1;
 
   return (
-    <div className="py-6">
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-emerald-100 rounded-full mb-4">
-          <CheckCircle className="text-emerald-700" size={48} />
+    <div className="py-2 sm:py-6">
+      {/* Success header - compact on mobile */}
+      <div className="text-center mb-4">
+        <div className="inline-flex items-center justify-center w-14 h-14 sm:w-20 sm:h-20 bg-emerald-100 rounded-full mb-2 sm:mb-4">
+          <CheckCircle className="text-emerald-700" size={32} />
         </div>
-        <h3 className="text-2xl font-bold text-stone-800 mb-2">¡Reserva Registrada!</h3>
-        <p className="text-stone-600">Revisa los detalles y confirma por WhatsApp</p>
+        <h3 className="text-lg sm:text-2xl font-bold text-stone-800 mb-1">¡Reserva Registrada!</h3>
+        <p className="text-stone-600 text-xs sm:text-sm">Confirma por WhatsApp para completar</p>
       </div>
-       {/* WhatsApp Confirmation Section */}
-      <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-6 mb-4">
-        <div className="text-center mb-4">
-          <div className="inline-flex items-center gap-2 bg-amber-200 text-amber-800 px-4 py-2 rounded-full font-semibold text-sm mb-3">
-            <span className="animate-pulse">⚠️</span>
-            IMPORTANTE
-          </div>
-          <h4 className="text-lg font-bold text-amber-900 mb-2">
-            Tu reserva aún no está confirmada
-          </h4>
-          <p className="text-amber-800 text-sm">
-            Para completar tu reserva, debes enviar los datos por WhatsApp presionando el botón de abajo
-          </p>
-          {/* Flechas animadas apuntando al botón */}
-        <div className="flex justify-center gap-4 mb-4 text-green-600">
-          <span className="animate-bounce text-2xl">↓</span>
-          <span className="animate-bounce text-2xl" style={{animationDelay: '0.1s'}}>↓</span>
-          <span className="animate-bounce text-2xl" style={{animationDelay: '0.2s'}}>↓</span>
-        </div>
 
-        <Button
-          onClick={handleWhatsAppRedirect}
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
-        >
-          <MessageCircle className="mr-2" size={24} />
-          Confirmar Reserva vía WhatsApp
-        </Button>
-
-        <p className="text-center text-xs text-amber-700 mt-3">
-          Al presionar el botón se abrirá WhatsApp con los datos de tu reserva
-        </p>
-        </div>
-
-      <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-6 mb-6">
-        {/* Service type */}
-        <div className="mb-6 pb-6 border-b border-emerald-200">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-emerald-200 rounded-lg">
-              {serviceType === 'fullday' ? <Calendar size={24} /> : <Home size={24} />}
-            </div>
-            <div>
-              <p className="font-semibold text-stone-800 text-lg">
+      {/* Details card - compact on mobile */}
+      <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-3 sm:p-6 mb-4">
+        {/* Service type and dates in a grid on mobile */}
+        <div className="grid grid-cols-2 gap-3 sm:block">
+          {/* Service */}
+          <div className="sm:mb-4 sm:pb-4 sm:border-b sm:border-emerald-200">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="p-1.5 sm:p-2 bg-emerald-200 rounded-lg">
+                {serviceType === 'fullday' ? <Calendar size={16} /> : <Home size={16} />}
+              </div>
+              <span className="font-semibold text-stone-800 text-sm sm:text-lg">
                 {serviceType === 'fullday' ? 'Full Day' : 'Hospedaje'}
-              </p>
-              {serviceType === 'hospedaje' && roomsData.length > 0 && (
-                <div className="mt-2 space-y-1">
-                  {roomsData.map(room => (
-                    <p key={room.id} className="text-sm text-stone-600">
-                      • Habitación {room.name} - €{room.price_per_night}/noche ({room.capacity} personas)
-                    </p>
-                  ))}
-                </div>
-              )}
-              {serviceType === 'fullday' && (
-                <div className="flex items-center gap-2 mt-2">
-                  <Users size={18} className="text-stone-600" />
-                  <p className="text-sm text-stone-600">{guests} persona{guests > 1 ? 's' : ''}</p>
-                </div>
-              )}
+              </span>
             </div>
+            {serviceType === 'hospedaje' && roomsData.length > 0 && (
+              <div className="text-xs text-stone-600 ml-8 sm:ml-10">
+                {roomsData.map(room => (
+                  <p key={room.id}>• {room.name}</p>
+                ))}
+              </div>
+            )}
+            {serviceType === 'fullday' && (
+              <div className="flex items-center gap-1 text-xs text-stone-600 ml-8 sm:ml-10">
+                <Users size={12} />
+                <span>{guests} persona{guests > 1 ? 's' : ''}</span>
+              </div>
+            )}
           </div>
-        </div>
 
-        {/* Dates */}
-        <div className="mb-6 pb-6 border-b border-emerald-200">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-emerald-200 rounded-lg">
-              <Calendar size={24} />
+          {/* Dates */}
+          <div className="sm:mb-4 sm:pb-4 sm:border-b sm:border-emerald-200">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="p-1.5 sm:p-2 bg-emerald-200 rounded-lg">
+                <Calendar size={16} />
+              </div>
+              <span className="font-semibold text-stone-800 text-sm">Fechas</span>
             </div>
-            <div>
-              <p className="font-semibold text-stone-800">Fechas</p>
+            <div className="text-xs text-stone-600 ml-8 sm:ml-10">
               {serviceType === 'fullday' ? (
-                <p className="text-sm text-stone-600 mt-1">
-                  {format(dateRange.from, "dd 'de' MMMM yyyy", { locale: es })}
-                  <br />
-                  <span className="text-xs">9:00 AM - 7:00 PM</span>
-                </p>
+                <p>{format(dateRange.from, "dd MMM yyyy", { locale: es })}</p>
               ) : (
-                <div className="text-sm text-stone-600 mt-1">
-                  <p>Check-in: {format(dateRange.from, "dd 'de' MMMM yyyy", { locale: es })} - 2:00 PM</p>
-                  <p>Check-out: {format(dateRange.to, "dd 'de' MMMM yyyy", { locale: es })} - 12:00 PM</p>
-                  <p className="text-xs mt-1">{nights} noche{nights > 1 ? 's' : ''}</p>
-                </div>
+                <>
+                  <p>In: {format(dateRange.from, "dd MMM", { locale: es })}</p>
+                  <p>Out: {format(dateRange.to, "dd MMM", { locale: es })}</p>
+                  <p className="text-emerald-700 font-medium">{nights} noche{nights > 1 ? 's' : ''}</p>
+                </>
               )}
             </div>
           </div>
         </div>
 
-        {/* Personal data */}
-        <div className="mb-6 pb-6 border-b border-emerald-200">
-          <p className="font-semibold text-stone-800 mb-2">Datos del Cliente</p>
-          <div className="space-y-1 text-sm text-stone-600">
-            <p><strong>Nombre:</strong> {personalData.name}</p>
-            <p><strong>Documento:</strong> {personalData.idDocument}</p>
-            <p><strong>Teléfono:</strong> {personalData.phone}</p>
-            {personalData.email && <p><strong>Email:</strong> {personalData.email}</p>}
+        {/* Client data - collapsible on mobile */}
+        <div className="mt-3 pt-3 border-t border-emerald-200 sm:mt-4 sm:pt-4">
+          <p className="font-semibold text-stone-800 text-sm mb-1">Cliente</p>
+          <div className="text-xs text-stone-600 grid grid-cols-2 gap-1 sm:block sm:space-y-0.5">
+            <p>{personalData.name}</p>
+            <p>{personalData.idDocument}</p>
+            <p>{personalData.phone}</p>
+            {personalData.email && <p className="col-span-2">{personalData.email}</p>}
           </div>
         </div>
 
-        {/* Total price */}
-        <div className="bg-white rounded-lg p-4">
+        {/* Total price - prominent */}
+        <div className="mt-3 bg-white rounded-lg p-3 sm:p-4">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-stone-600">Total a pagar</p>
-              {serviceType === 'hospedaje' && nights > 1 && (
-                <p className="text-xs text-stone-500">{nights} noche{nights > 1 ? 's' : ''}</p>
-              )}
+              <p className="text-stone-600 text-xs sm:text-sm">Total a pagar</p>
             </div>
-            <div className="text-right">
-              <p className="text-3xl font-bold text-emerald-700">
-                €{reservation.total_price}
-              </p>
-            </div>
+            <p className="text-2xl sm:text-3xl font-bold text-emerald-700">
+              €{reservation.total_price}
+            </p>
           </div>
         </div>
       </Card>
 
+      {/* WhatsApp section - prominent and sticky on mobile */}
+      <div className="sticky bottom-0 bg-white -mx-4 px-4 py-3 sm:mx-0 sm:px-0 sm:py-0 sm:static border-t sm:border-t-0 border-amber-200">
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-3 sm:p-6">
+          <div className="text-center mb-3">
+            <div className="inline-flex items-center gap-1 bg-amber-200 text-amber-800 px-3 py-1 rounded-full font-semibold text-xs mb-2">
+              <span>⚠️</span> IMPORTANTE
+            </div>
+            <p className="text-amber-900 font-bold text-sm sm:text-lg">
+              Confirma por WhatsApp
+            </p>
+            <p className="text-amber-800 text-xs hidden sm:block">
+              Presiona el botón para completar tu reserva
+            </p>
+          </div>
 
-        
+          {/* Arrows */}
+          <div className="flex justify-center gap-2 mb-2 text-green-600">
+            <span className="animate-bounce text-lg">↓</span>
+            <span className="animate-bounce text-lg" style={{animationDelay: '0.1s'}}>↓</span>
+            <span className="animate-bounce text-lg" style={{animationDelay: '0.2s'}}>↓</span>
+          </div>
+
+          <Button
+            onClick={handleWhatsAppRedirect}
+            className="w-full bg-green-600 hover:bg-green-700 text-white py-4 sm:py-6 text-sm sm:text-lg font-bold shadow-lg"
+          >
+            <MessageCircle className="mr-2" size={20} />
+            Confirmar vía WhatsApp
+          </Button>
+
+          {/* Alternative */}
+          <Button
+            onClick={copyMessage}
+            variant="ghost"
+            className="w-full mt-2 text-amber-700 text-xs sm:text-sm"
+            size="sm"
+          >
+            📋 Copiar mensaje (alternativa)
+          </Button>
+        </div>
+
+        <p className="text-center text-xs text-stone-400 mt-2">
+          Tel: +58 424 773 9434
+        </p>
       </div>
-
-      {/* Botón alternativo */}
-      <div className="space-y-3">
-        <Button
-          onClick={() => {
-            const whatsappData = {
-              reservation_type: serviceType,
-              rooms: roomsData.map(r => r.name),
-              num_guests: guests,
-              total_price: reservation.total_price,
-              check_in_date: format(dateRange.from, 'dd/MM/yyyy', { locale: es }),
-              check_out_date: dateRange.to ? format(dateRange.to, 'dd/MM/yyyy', { locale: es }) : null,
-              client_name: personalData.name,
-              client_document: personalData.idDocument,
-              client_phone: personalData.phone,
-              client_email: personalData.email
-            };
-            
-            // Generate message
-            let message = `Hola! Quiero confirmar mi reserva:\n\n`;
-            message += `Tipo de Servicio: ${whatsappData.reservation_type === 'fullday' ? 'Full Day' : 'Hospedaje'}\n\n`;
-            
-            if (whatsappData.reservation_type === 'hospedaje') {
-              message += `Habitaciones:\n`;
-              whatsappData.rooms.forEach(room => {
-                message += `   - ${room}\n`;
-              });
-              message += `\n`;
-            } else {
-              message += `Personas: ${whatsappData.num_guests}\n`;
-              message += `Total: €${whatsappData.total_price}\n\n`;
-            }
-            
-            message += `Fecha de entrada: ${whatsappData.check_in_date}\n`;
-            if (whatsappData.check_out_date) {
-              message += `Fecha de salida: ${whatsappData.check_out_date}\n`;
-            }
-            message += `\n`;
-            
-            message += `Datos del Cliente:\n`;
-            message += `   Nombre: ${whatsappData.client_name}\n`;
-            message += `   Documento: ${whatsappData.client_document}\n`;
-            message += `   Telefono: ${whatsappData.client_phone}\n`;
-            if (whatsappData.client_email) {
-              message += `   Email: ${whatsappData.client_email}\n`;
-            }
-            
-            // Copy to clipboard
-            navigator.clipboard.writeText(message).then(() => {
-              toast.success('¡Mensaje copiado! Ahora pégalo en WhatsApp');
-            }).catch(() => {
-              toast.error('No se pudo copiar. Usa el botón de arriba.');
-            });
-          }}
-          variant="outline"
-          className="w-full border-2 border-stone-300 text-stone-600 hover:bg-stone-50 py-4"
-        >
-          📋 Copiar Mensaje (alternativa)
-        </Button>
-      </div>
-
-      <p className="text-center text-sm text-stone-500 mt-4">
-        ¿Problemas con el botón? Copia el mensaje y envíalo manualmente al +58 424 773 9434
-      </p>
     </div>
   );
 };

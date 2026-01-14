@@ -41,7 +41,6 @@ export const RoomSelector = ({ onSelect, onBack }) => {
       return;
     }
     
-    // Preload unavailable dates before moving to calendar
     setLoadingAvailability(true);
     try {
       const today = new Date();
@@ -49,14 +48,12 @@ export const RoomSelector = ({ onSelect, onBack }) => {
       const startDate = format(today, 'yyyy-MM-dd');
       const endDate = format(threeMonthsLater, 'yyyy-MM-dd');
       
-      // Fetch availability for all selected rooms
       const availabilityPromises = selectedRooms.map(roomId =>
         availabilityAPI.getRoomAvailability(roomId, startDate, endDate)
       );
       
       const results = await Promise.all(availabilityPromises);
       
-      // Collect all unavailable dates
       const allUnavailable = new Set();
       results.forEach(result => {
         result.unavailable_dates.forEach(date => allUnavailable.add(date));
@@ -65,7 +62,6 @@ export const RoomSelector = ({ onSelect, onBack }) => {
       onSelect(selectedRooms, Array.from(allUnavailable));
     } catch (error) {
       console.error('Error preloading availability:', error);
-      // Continue anyway, the calendar will load dates itself
       onSelect(selectedRooms, []);
     } finally {
       setLoadingAvailability(false);
@@ -91,10 +87,11 @@ export const RoomSelector = ({ onSelect, onBack }) => {
   }
 
   return (
-    <div className="py-4">
-      <p className="text-stone-600 mb-6 text-center">Puedes seleccionar una o ambas habitaciones</p>
+    <div className="py-2 sm:py-4">
+      <p className="text-stone-600 mb-4 text-center text-sm sm:text-base">Puedes seleccionar una o ambas habitaciones</p>
       
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
+      {/* Rooms grid - more compact on mobile */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 mb-4">
         {rooms.map((room) => {
           const isSelected = selectedRooms.includes(room.id);
           
@@ -103,98 +100,108 @@ export const RoomSelector = ({ onSelect, onBack }) => {
               key={room.id}
               className={`cursor-pointer transition-all duration-300 ${
                 isSelected 
-                  ? 'border-2 border-emerald-600 shadow-lg scale-105' 
+                  ? 'border-2 border-emerald-600 shadow-lg sm:scale-105' 
                   : 'border-2 border-stone-200 hover:border-emerald-400'
               }`}
               onClick={() => toggleRoom(room.id)}
             >
-              {/* Image */}
-              <div className="relative h-48 overflow-hidden">
-                <img
-                  src={room.images[0]}
-                  alt={room.name}
-                  className="w-full h-full object-cover"
-                />
-                
-                {/* Checkbox overlay */}
-                <div className="absolute top-4 right-4">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    isSelected ? 'bg-emerald-600' : 'bg-white/80'
-                  }`}>
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={() => toggleRoom(room.id)}
-                      className="pointer-events-none"
-                    />
+              {/* Horizontal layout on mobile, vertical on desktop */}
+              <div className="flex sm:flex-col">
+                {/* Image */}
+                <div className="relative w-28 sm:w-full h-28 sm:h-48 flex-shrink-0 overflow-hidden">
+                  <img
+                    src={room.images[0]}
+                    alt={room.name}
+                    className="w-full h-full object-cover rounded-l-lg sm:rounded-l-none sm:rounded-t-lg"
+                  />
+                  
+                  {/* Checkbox overlay */}
+                  <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
+                    <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center ${
+                      isSelected ? 'bg-emerald-600' : 'bg-white/80'
+                    }`}>
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => toggleRoom(room.id)}
+                        className="pointer-events-none"
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* Price badge */}
-                <div className="absolute bottom-4 left-4">
-                  <div className="bg-amber-600 text-white px-4 py-2 rounded-full font-bold flex items-center gap-2">
-                    <Euro size={18} />
-                    <span>{room.price_per_night}/noche</span>
+                {/* Content */}
+                <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-base sm:text-xl font-bold text-stone-800 mb-1">Habitación {room.name}</h3>
+                    <div className="flex items-center gap-1 text-stone-600 text-xs sm:text-sm">
+                      <Users className="text-emerald-600" size={16} />
+                      <span>{room.capacity} personas</span>
+                    </div>
+                  </div>
+                  
+                  {/* Price - always visible */}
+                  <div className="mt-2">
+                    <div className="inline-flex items-center gap-1 bg-amber-600 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold">
+                      <Euro size={14} />
+                      <span>{room.price_per_night}/noche</span>
+                    </div>
                   </div>
                 </div>
               </div>
-
-              <CardContent className="pt-4">
-                <h3 className="text-xl font-bold text-stone-800 mb-2">Habitación {room.name}</h3>
-                <div className="flex items-center gap-2 text-stone-600 mb-3">
-                  <Users className="text-emerald-600" size={20} />
-                  <span>Capacidad: {room.capacity} personas</span>
-                </div>
-                <p className="text-sm text-stone-600">{room.description}</p>
-              </CardContent>
             </Card>
           );
         })}
       </div>
 
-      {/* Summary */}
-      {selectedRooms.length > 0 && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="font-semibold text-stone-800">
-                {selectedRooms.length} habitación{selectedRooms.length > 1 ? 'es' : ''} seleccionada{selectedRooms.length > 1 ? 's' : ''}
-              </p>
-              <p className="text-sm text-stone-600">Capacidad total: {totalCapacity} personas</p>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-emerald-700">€{totalPrice}</p>
-              <p className="text-xs text-stone-600">por noche</p>
+      {/* Summary - sticky on mobile */}
+      <div className="sticky bottom-0 bg-white pt-2 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:static border-t sm:border-t-0 border-stone-200">
+        {selectedRooms.length > 0 && (
+          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 sm:p-4 mb-3">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-semibold text-stone-800 text-sm sm:text-base">
+                  {selectedRooms.length} habitación{selectedRooms.length > 1 ? 'es' : ''}
+                </p>
+                <p className="text-xs sm:text-sm text-stone-600">Capacidad: {totalCapacity} personas</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xl sm:text-2xl font-bold text-emerald-700">€{totalPrice}</p>
+                <p className="text-xs text-stone-600">por noche</p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Actions */}
-      <div className="flex justify-between gap-4">
-        <Button
-          variant="outline"
-          onClick={onBack}
-          disabled={loadingAvailability}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft size={18} />
-          Atrás
-        </Button>
-        
-        <Button
-          onClick={handleContinue}
-          disabled={selectedRooms.length === 0 || loadingAvailability}
-          className="bg-emerald-700 hover:bg-emerald-800 text-white flex-1"
-        >
-          {loadingAvailability ? (
-            <>
-              <Loader2 className="animate-spin mr-2" size={18} />
-              Cargando disponibilidad...
-            </>
-          ) : (
-            'Continuar'
-          )}
-        </Button>
+        {/* Actions */}
+        <div className="flex justify-between gap-3">
+          <Button
+            variant="outline"
+            onClick={onBack}
+            disabled={loadingAvailability}
+            className="flex items-center gap-1 text-sm"
+            size="sm"
+          >
+            <ArrowLeft size={16} />
+            <span className="hidden sm:inline">Atrás</span>
+          </Button>
+          
+          <Button
+            onClick={handleContinue}
+            disabled={selectedRooms.length === 0 || loadingAvailability}
+            className="bg-emerald-700 hover:bg-emerald-800 text-white flex-1 text-sm"
+            size="sm"
+          >
+            {loadingAvailability ? (
+              <>
+                <Loader2 className="animate-spin mr-1" size={16} />
+                <span className="hidden sm:inline">Cargando...</span>
+                <span className="sm:hidden">...</span>
+              </>
+            ) : (
+              'Continuar'
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );
