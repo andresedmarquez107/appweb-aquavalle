@@ -1,22 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Badge } from './ui/badge';
-// AQUÍ ESTABA EL ERROR: Agregué los iconos que faltaban (ZoomIn, ChevronLeft, etc.)
-import { Users, Euro, Wifi, Tv, Flame, Droplets, ZoomIn, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Users, Wifi, Tv, Flame, Droplets, ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react';
 import { useRooms } from '../hooks/useRooms';
 
 // Room Image Carousel Component
 const RoomCarousel = ({ images, roomName, onImageClick }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  // PROTECCIÓN: Si no hay imágenes, mostramos un recuadro gris en vez de romper la app
-  if (!images || images.length === 0) {
-    return (
-      <div className="h-64 w-full bg-stone-200 flex items-center justify-center text-stone-500">
-        Sin imagen disponible
-      </div>
-    );
-  }
 
   const nextSlide = (e) => {
     e.stopPropagation();
@@ -92,17 +82,14 @@ const Lightbox = ({ images, currentIndex, onClose, onNavigate }) => {
     if (e.key === 'Escape') onClose();
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     document.body.style.overflow = 'hidden';
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'unset';
     };
-  }, []); // El array vacío está bien aquí
-
-  // Protección por si images es undefined
-  if (!images || images.length === 0) return null;
+  }, []);
 
   return (
     <div 
@@ -164,14 +151,10 @@ const Lightbox = ({ images, currentIndex, onClose, onNavigate }) => {
 
 export const Rooms = () => {
   const { rooms, loading, error } = useRooms();
-  
   const [lightbox, setLightbox] = useState({ open: false, images: [], index: 0 });
   
   const openLightbox = (images, index) => {
-    // Protección: asegurarnos de que hay imágenes antes de abrir
-    if (images && images.length > 0) {
-      setLightbox({ open: true, images, index });
-    }
+    setLightbox({ open: true, images, index });
   };
 
   const closeLightbox = () => {
@@ -186,7 +169,7 @@ export const Rooms = () => {
         : (prev.index - 1 + prev.images.length) % prev.images.length
     }));
   };
-
+  
   if (loading) {
     return (
       <section id="habitaciones" className="py-20 bg-white">
@@ -225,61 +208,52 @@ export const Rooms = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
-          {/* --- BLOQUE SEGURO INICIO --- */}
-          {Array.isArray(rooms) && rooms.length > 0 ? (
-            rooms.map((room, index) => (
-              <Card key={room.id} className="overflow-hidden border-2 border-stone-200 hover:border-emerald-500 transition-all duration-300 hover:shadow-xl">
-                {/* AQUI USAMOS EL NUEVO CARRUSEL */}
+          {rooms.map((room, index) => (
+            <Card key={room.id} className="overflow-hidden border-2 border-stone-200 hover:border-emerald-500 transition-all duration-300 hover:shadow-xl">
+              <div className="relative">
                 <RoomCarousel 
                   images={room.images} 
                   roomName={room.name}
                   onImageClick={(imgIndex) => openLightbox(room.images, imgIndex)}
                 />
-                
-                <div className="relative">
-                  {/* Badge de precio movido un poco para no tapar flechas si es necesario, 
-                      o puedes dejarlo dentro del carrusel si prefieres */}
+                <div className="absolute top-4 right-4 z-10">
+                  <Badge className={`${index === 0 ? 'bg-amber-600' : 'bg-emerald-700'} text-white px-4 py-2 text-lg`}>
+                    €{room.price_per_night}/noche
+                  </Badge>
                 </div>
-                
-                <CardHeader>
-                  <CardTitle className="text-2xl text-stone-800">Habitación {room.name}</CardTitle>
-                  <CardDescription className="flex items-center gap-2 text-lg">
-                    <Users className="text-emerald-600" size={20} />
-                    <span>Capacidad: {room.capacity} personas</span>
-                  </CardDescription>
-                </CardHeader>
+              </div>
+              
+              <CardHeader>
+                <CardTitle className="text-2xl text-stone-800">Habitación {room.name}</CardTitle>
+                <CardDescription className="flex items-center gap-2 text-lg">
+                  <Users className="text-emerald-600" size={20} />
+                  <span>Capacidad: {room.capacity} personas</span>
+                </CardDescription>
+              </CardHeader>
 
-                <CardContent>
-                  <p className="text-stone-600 mb-4">{room.description}</p>
-                  
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-stone-800 mb-3">Características:</h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      {Array.isArray(room.features) && room.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-sm text-stone-700">
-                          <span className="text-emerald-600">
-                            {iconMap[feature] || <Users size={18} />}
-                          </span>
-                          <span>{feature}</span>
-                        </div>
-                      ))}
-                    </div>
+              <CardContent>
+                <p className="text-stone-600 mb-4">{room.description}</p>
+                
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-stone-800 mb-3">Características:</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {room.features.map((feature, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-sm text-stone-700">
+                        <span className="text-emerald-600">
+                          {iconMap[feature] || <Users size={18} />}
+                        </span>
+                        <span>{feature}</span>
+                      </div>
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <div className="col-span-2 text-center p-12 border-2 border-dashed border-stone-300 rounded-lg">
-              <p className="text-xl text-stone-500 mb-2">Cargando habitaciones...</p>
-              <p className="text-xs text-stone-400">Si esto tarda mucho, hay un error de conexión.</p>
-              {console.log("DEBUG - Datos recibidos en rooms:", rooms)}
-            </div>
-          )}
-          {/* --- BLOQUE SEGURO FIN --- */}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
-      
-      {/* Lightbox Modal */}
+
+      {/* Lightbox */}
       {lightbox.open && (
         <Lightbox 
           images={lightbox.images}
