@@ -14,8 +14,38 @@ export const PersonalDataForm = ({ onSubmit, onBack, initialData }) => {
     phone: initialData?.phone || ''
   });
 
+  // Función para capitalizar cada palabra (primera letra mayúscula)
+  const capitalizeWords = (text) => {
+    return text
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  // Función para filtrar solo letras y espacios (sin números)
+  const onlyLetters = (text) => {
+    return text.replace(/[0-9]/g, '');
+  };
+
+  // Función para filtrar solo números
+  const onlyNumbers = (text) => {
+    return text.replace(/[^0-9]/g, '');
+  };
+
   const handleChange = (field, value) => {
-    setFormData({ ...formData, [field]: value });
+    let processedValue = value;
+
+    // Validaciones específicas por campo
+    if (field === 'name') {
+      // Eliminar números y capitalizar cada palabra
+      processedValue = capitalizeWords(onlyLetters(value));
+    } else if (field === 'idDocument') {
+      // Solo permitir números
+      processedValue = onlyNumbers(value);
+    }
+
+    setFormData({ ...formData, [field]: processedValue });
   };
 
   const handleSubmit = (e) => {
@@ -82,9 +112,10 @@ export const PersonalDataForm = ({ onSubmit, onBack, initialData }) => {
             <Input
               id="idDocument"
               type="text"
+              inputMode="numeric"
               value={formData.idDocument}
               onChange={(e) => handleChange('idDocument', e.target.value)}
-              placeholder="Ej: V-12345678 o E-12345678"
+              placeholder="Ej: 12345678"
               className="border-2"
               required
             />
