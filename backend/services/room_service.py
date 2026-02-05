@@ -41,7 +41,7 @@ class RoomService:
                 )
             ]
         
-        response = db.table('rooms').select('*').eq('is_active', "true").execute()
+        response = db.table('rooms').select('*').eq('is_active', True).execute()
         
         rooms = []
         for data in response.data:
