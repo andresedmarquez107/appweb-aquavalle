@@ -58,6 +58,7 @@ PyJWT==2.10.1
 pymongo==4.5.0
 pyparsing==3.2.5
 pyroaring==1.0.3
+psycopg2-binary
 pytest==9.0.1
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.1
