@@ -3,7 +3,7 @@ import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Calendar } from '../ui/calendar';
 import { ArrowLeft, Calendar as CalendarIcon } from 'lucide-react';
-import { format, addDays } from 'date-fns';
+import { format, addDays, addMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 
@@ -55,12 +55,22 @@ export const DateRangeSelector = ({ serviceType, onSelect, onBack, roomIds, prel
     }
   };
 
+  // Calculate max date (6 months from today)
+  const maxDate = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return addMonths(today, 6);
+  }, []);
+
   const disabledDates = (date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
     // Disable past dates
     if (date < today) return true;
+    
+    // Disable dates beyond 6 months
+    if (date > maxDate) return true;
     
     const dateStr = format(date, 'yyyy-MM-dd');
     
@@ -110,6 +120,9 @@ export const DateRangeSelector = ({ serviceType, onSelect, onBack, roomIds, prel
               : 'Selecciona tus fechas de entrada y salida'
           }
         </p>
+        <p className="text-stone-500 text-sm mt-1">
+          Puedes reservar con hasta 6 meses de antelación
+        </p>
       </div>
 
       <Card className="border-2 border-stone-200 p-6">
@@ -127,6 +140,8 @@ export const DateRangeSelector = ({ serviceType, onSelect, onBack, roomIds, prel
             disabled={disabledDates}
             numberOfMonths={2}
             locale={es}
+            fromMonth={new Date()}
+            toMonth={maxDate}
             className="rounded-md"
           />
         </div>
