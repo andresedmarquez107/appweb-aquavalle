@@ -7,7 +7,7 @@ import { es } from 'date-fns/locale';
 import { roomsAPI, reservationsAPI, openWhatsApp } from '../../services/api';
 import { toast } from 'sonner';
 
-export const ReservationConfirmation = ({ data, onClose }) => {
+export const ReservationConfirmation = ({ data, onClose, onBack }) => {
   const { serviceType, rooms: roomIds, guests, dateRange, personalData } = data;
   const [loading, setLoading] = useState(true);
   const [reservation, setReservation] = useState(null);
@@ -160,13 +160,35 @@ export const ReservationConfirmation = ({ data, onClose }) => {
   }
 
   if (error) {
+    // Check if it's a document/name mismatch error
+    const isDocumentError = error.includes('ya está registrado con otro nombre');
+    
     return (
-      <div className="py-6 text-center">
-        <div className="text-red-600 mb-3 text-lg font-semibold">Error al crear la reserva</div>
-        <p className="text-stone-600 mb-4 text-sm">{error}</p>
-        <Button onClick={onClose} variant="outline" size="sm">
-          Cerrar e Intentar de Nuevo
-        </Button>
+      <div className="py-6">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+            <span className="text-3xl">⚠️</span>
+          </div>
+          <div className="text-red-600 mb-2 text-lg font-semibold">Error al crear la reserva</div>
+          <p className="text-stone-600 text-sm max-w-md mx-auto">{error}</p>
+        </div>
+        
+        {isDocumentError && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4 text-sm">
+            <p className="text-amber-800">
+              <strong>💡 Sugerencia:</strong> Verifica que el nombre y documento coincidan con los datos registrados anteriormente, o usa un documento diferente si eres un cliente nuevo.
+            </p>
+          </div>
+        )}
+        
+        <div className="flex gap-3 justify-center">
+          <Button onClick={onBack} variant="default" className="bg-emerald-700 hover:bg-emerald-800">
+            ← Corregir Datos
+          </Button>
+          <Button onClick={onClose} variant="outline">
+            Cancelar
+          </Button>
+        </div>
       </div>
     );
   }

@@ -46,13 +46,25 @@ class ReservationService:
                 'phone': reservation_data.client_phone
             }
             
-            # Check if client exists
+            # Check if client exists with this document
             existing_client = db.table('clients').select('*').eq('id_document', reservation_data.client_document).execute()
             
             if existing_client.data:
-                client_id = existing_client.data[0]['id']
-                # Update client info
-                db.table('clients').update(client_data).eq('id', client_id).execute()
+                existing = existing_client.data[0]
+                # Normalize names for comparison (lowercase, strip extra spaces)
+                existing_name = ' '.join(existing['full_name'].lower().split())
+                new_name = ' '.join(reservation_data.client_name.lower().split())
+                
+                # If document exists but name is different, reject
+                if existing_name != new_name:
+                    raise Exception(f'El documento {reservation_data.client_document} ya está registrado con otro nombre ({existing["full_name"]}). Si eres el mismo cliente, usa el nombre registrado.')
+                
+                client_id = existing['id']
+                # Update client info (email and phone can be updated)
+                db.table('clients').update({
+                    'email': reservation_data.client_email,
+                    'phone': reservation_data.client_phone
+                }).eq('id', client_id).execute()
             else:
                 # Create new client
                 new_client = db.table('clients').insert(client_data).execute()

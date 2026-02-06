@@ -10,6 +10,7 @@ import { ReservationConfirmation } from './wizard/ReservationConfirmation';
 export const ReservationWizard = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
   const [unavailableDates, setUnavailableDates] = useState([]);
+  const [confirmationKey, setConfirmationKey] = useState(0); // Key to reset confirmation component
   const [reservationData, setReservationData] = useState({
     serviceType: null,
     rooms: [],
@@ -47,6 +48,7 @@ export const ReservationWizard = ({ isOpen, onClose }) => {
 
   const handlePersonalDataSubmit = (personalData) => {
     setReservationData({ ...reservationData, personalData });
+    setConfirmationKey(prev => prev + 1); // Increment key to reset confirmation component
     setStep(5);
   };
 
@@ -127,8 +129,10 @@ export const ReservationWizard = ({ isOpen, onClose }) => {
           
           {step === 5 && (
             <ReservationConfirmation 
+              key={confirmationKey}
               data={reservationData}
               onClose={handleClose}
+              onBack={handleBack}
             />
           )}
         </div>
