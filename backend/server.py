@@ -39,14 +39,24 @@ api_router.include_router(admin.router)
 
 # Include the router in the main app
 app.include_router(api_router)
+# ... importaciones anteriores ...
+
+# Lista de orígenes permitidos (La "Lista de Invitados")
+origins = [
+    "http://localhost:3000",  # Para que funcione en tu PC
+    "http://127.0.0.1:3000",  # Alternativa local por si acaso
+    "https://appweb-aquavalle.vercel.app" # Tu URL de Vercel
+]
 
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=origins,  # Aquí usamos la lista específica, NO ["*"]
     allow_credentials=True,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],    # Permitir todos los métodos (GET, POST, PUT, DELETE)
+    allow_headers=["*"],    # Permitir todos los headers
 )
+
+
 
 # Configure logging
 logging.basicConfig(
