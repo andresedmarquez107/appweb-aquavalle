@@ -31,6 +31,7 @@ export const PersonalDataForm = ({ onSubmit, onBack, initialData }) => {
   });
 
   const MAX_NAME_LENGTH = 50;
+  const MAX_EMAIL_LENGTH = 50;
 
   // Lista de códigos de país con sus longitudes de número local
   const countryCodes = [
@@ -125,6 +126,11 @@ export const PersonalDataForm = ({ onSubmit, onBack, initialData }) => {
   };
 
   const handleEmailChange = (value) => {
+    // Limitar longitud
+    if (value.length > MAX_EMAIL_LENGTH) {
+      return;
+    }
+    
     // Verificar el último carácter ingresado
     if (value.length > formData.email.length) {
       const newChar = value.slice(-1);
@@ -154,21 +160,26 @@ export const PersonalDataForm = ({ onSubmit, onBack, initialData }) => {
         maxLength = 10; // E: máximo 10
       }
       
-      processedValue = processedValue.slice(0, maxLength);
-      
-      if (value !== processedValue && value.length > formData.idDocument.length) {
+      // Verificar si se ingresó un carácter no numérico (antes de truncar)
+      if (value.length > formData.idDocument.length && processedValue.length === formData.idDocument.length) {
+        // Se intentó agregar un carácter pero no se agregó nada válido
         errorMsg = 'Solo se permiten números';
       }
+      
+      processedValue = processedValue.slice(0, maxLength);
+      
     } else {
       // Pasaporte: números y letras
       processedValue = onlyAlphanumeric(value);
       
-      // Limitar a 9 caracteres máximo
-      processedValue = processedValue.slice(0, 9);
+      maxLength = 9;
       
-      if (value !== processedValue && value.length > formData.idDocument.length) {
+      // Verificar si se ingresó un carácter no alfanumérico (antes de truncar)
+      if (value.length > formData.idDocument.length && processedValue.length === formData.idDocument.length) {
         errorMsg = 'Solo se permiten letras y números';
       }
+      
+      processedValue = processedValue.slice(0, maxLength);
     }
 
     if (errorMsg) {
@@ -480,13 +491,16 @@ export const PersonalDataForm = ({ onSubmit, onBack, initialData }) => {
                 onChange={(e) => handleEmailChange(e.target.value)}
                 placeholder="Ej: juan@email.com"
                 className={`border-2 ${errors.email ? 'border-red-400' : ''}`}
+                maxLength={MAX_EMAIL_LENGTH}
               />
             </div>
-            {errors.email && (
+            {errors.email ? (
               <p className="text-xs text-red-500 flex items-center gap-1">
                 <AlertCircle size={12} />
                 {errors.email}
               </p>
+            ) : (
+              <p className="text-xs text-stone-400 text-right">{formData.email.length}/{MAX_EMAIL_LENGTH}</p>
             )}
           </div>
 
