@@ -5,6 +5,8 @@ from datetime import datetime, timedelta, timezone, date
 from database import get_db
 from auth import verify_password, get_password_hash, create_access_token, get_current_admin
 import logging
+import random
+import string
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -25,7 +27,6 @@ class ReservationUpdate(BaseModel):
     check_out_date: Optional[str] = None
     num_guests: Optional[int] = None
     notes: Optional[str] = None
-    # Client data updates
     client_name: Optional[str] = None
     client_phone: Optional[str] = None
 
@@ -38,17 +39,15 @@ class DashboardStats(BaseModel):
     fullday_bookings: int
     hospedaje_bookings: int
     upcoming_checkins: int
-    # Monthly breakdown
     month_label: Optional[str] = None
 
-# Availability Block Models
 class BlockCreate(BaseModel):
-    room_id: Optional[str] = None  # None = all rooms
+    room_id: Optional[str] = None
     start_date: str
     end_date: str
-    block_type: str  # maintenance, private_event, other
+    block_type: str
     reason: Optional[str] = None
-    blocks_fullday: bool = False  # Also block Full Day service
+    blocks_fullday: bool = False
 
 class BlockResponse(BaseModel):
     id: str
@@ -61,61 +60,138 @@ class BlockResponse(BaseModel):
     blocks_fullday: bool
     created_at: str
 
+# Password Recovery Models
+class PasswordResetRequest(BaseModel):
+    pass
 
-# Endpoints
+class PasswordResetVerify(BaseModel):
+    reset_code: str
+    new_password: str
+
+
+def generate_reset_code() -> str:
+    return ''.join(random.choices(string.digits, k=6))
+
+
+# =====================================================
+# LOGIN ENDPOINT
+# =====================================================
 @router.post("/login", response_model=AdminLoginResponse)
 async def admin_login(credentials: AdminLogin):
-    """Login for admin users"""
     db = get_db()
     
     if not db:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Database not configured"
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database not configured")
     
     try:
-        # Find admin by email
         result = db.table('admin_users').select('*').eq('email', credentials.email).execute()
         
         if not result.data:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Credenciales incorrectas"
-            )
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales incorrectas")
         
         admin = result.data[0]
         
-        # Verify password
         if not verify_password(credentials.password, admin['password_hash']):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Credenciales incorrectas"
-            )
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales incorrectas")
         
-        # Create access token
-        access_token = create_access_token(
-            data={"sub": admin['email'], "admin_id": admin['id']}
-        )
+        access_token = create_access_token(data={"sub": admin['email'], "admin_id": admin['id']})
         
-        return AdminLoginResponse(
-            access_token=access_token,
-            admin_email=admin['email']
-        )
+        return AdminLoginResponse(access_token=access_token, admin_email=admin['email'])
         
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Login error: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error en el servidor"
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error en el servidor")
 
+
+# =====================================================
+# PASSWORD RECOVERY ENDPOINTS
+# =====================================================
+@router.post("/request-password-reset")
+async def request_password_reset(request: PasswordResetRequest):
+    from services.email_service import send_password_reset_email, ADMIN_EMAIL
+    
+    db = get_db()
+    
+    try:
+        result = db.table('admin_users').select('*').eq('email', ADMIN_EMAIL).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No se encontró la cuenta de administrador")
+        
+        reset_code = generate_reset_code()
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
+        
+        db.table('admin_users').update({
+            'reset_code': reset_code,
+            'reset_code_expires_at': expires_at.isoformat()
+        }).eq('email', ADMIN_EMAIL).execute()
+        
+        email_sent = send_password_reset_email(reset_code)
+        
+        if not email_sent:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error enviando el email")
+        
+        return {"message": "Código de recuperación enviado", "email_hint": f"***{ADMIN_EMAIL[-15:]}"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error en recuperación: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error procesando la solicitud")
+
+
+@router.post("/reset-password")
+async def reset_password(request: PasswordResetVerify):
+    from services.email_service import ADMIN_EMAIL
+    
+    db = get_db()
+    
+    try:
+        result = db.table('admin_users').select('*').eq('email', ADMIN_EMAIL).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cuenta no encontrada")
+        
+        admin = result.data[0]
+        
+        if admin.get('reset_code') != request.reset_code:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Código incorrecto")
+        
+        expires_at = admin.get('reset_code_expires_at')
+        if expires_at:
+            expires_datetime = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+            if datetime.now(timezone.utc) > expires_datetime:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="El código ha expirado")
+        
+        if len(request.new_password) < 6:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="La contraseña debe tener al menos 6 caracteres")
+        
+        new_hash = get_password_hash(request.new_password)
+        db.table('admin_users').update({
+            'password_hash': new_hash,
+            'reset_code': None,
+            'reset_code_expires_at': None,
+            'updated_at': datetime.now(timezone.utc).isoformat()
+        }).eq('email', ADMIN_EMAIL).execute()
+        
+        return {"message": "Contraseña actualizada exitosamente"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error reseteando contraseña: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error actualizando contraseña")
+
+
+# =====================================================
+# OTHER ADMIN ENDPOINTS
+# =====================================================
 @router.get("/me")
 async def get_current_admin_info(admin: dict = Depends(get_current_admin)):
-    """Get current admin info"""
     return admin
+
 
 @router.get("/stats", response_model=DashboardStats)
 async def get_dashboard_stats(
@@ -123,15 +199,12 @@ async def get_dashboard_stats(
     year: Optional[int] = Query(None, ge=2020, le=2100),
     admin: dict = Depends(get_current_admin)
 ):
-    """Get dashboard statistics, optionally filtered by month/year"""
     db = get_db()
     
     try:
-        # Get all reservations
         reservations = db.table('reservations').select('*').execute()
         all_res = reservations.data
         
-        # Filter by month/year if provided
         month_label = None
         if month and year:
             month_names = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -146,23 +219,16 @@ async def get_dashboard_stats(
                         filtered_res.append(r)
             all_res = filtered_res
         
-        # Calculate stats
         total = len(all_res)
         pending = len([r for r in all_res if r['status'] == 'pending'])
         confirmed = len([r for r in all_res if r['status'] == 'confirmed'])
         cancelled = len([r for r in all_res if r['status'] == 'cancelled'])
         
-        # Only count revenue from confirmed and completed reservations
-        total_revenue = sum(
-            float(r['total_price'] or 0) 
-            for r in all_res 
-            if r['status'] in ['confirmed', 'completed']
-        )
+        total_revenue = sum(float(r['total_price'] or 0) for r in all_res if r['status'] in ['confirmed', 'completed'])
         
         fullday = len([r for r in all_res if r['reservation_type'] == 'fullday'])
         hospedaje = len([r for r in all_res if r['reservation_type'] == 'hospedaje'])
         
-        # Upcoming check-ins (next 7 days)
         today = datetime.now(timezone.utc).date()
         week_later = today + timedelta(days=7)
         upcoming = len([r for r in all_res 
@@ -184,10 +250,8 @@ async def get_dashboard_stats(
         
     except Exception as e:
         logger.error(f"Error getting stats: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error obteniendo estadísticas"
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error obteniendo estadísticas")
+
 
 @router.get("/reservations")
 async def get_all_reservations(
@@ -197,26 +261,20 @@ async def get_all_reservations(
     year: Optional[int] = Query(None, ge=2020, le=2100),
     admin: dict = Depends(get_current_admin)
 ):
-    """Get all reservations with optional filters"""
     db = get_db()
     
     try:
-        query = db.table('reservations').select(
-            '*, clients(*), reservation_rooms(rooms(*))'
-        ).order('created_at', desc=True)
+        query = db.table('reservations').select('*, clients(*), reservation_rooms(rooms(*))').order('created_at', desc=True)
         
         if status_filter:
             query = query.eq('status', status_filter)
-        
         if reservation_type:
             query = query.eq('reservation_type', reservation_type)
         
         result = query.execute()
         
-        # Format response
         reservations = []
         for data in result.data:
-            # Filter by month/year if provided
             if month and year and data['check_in_date']:
                 res_date = datetime.fromisoformat(data['check_in_date']).date()
                 if res_date.month != month or res_date.year != year:
@@ -250,35 +308,23 @@ async def get_all_reservations(
         
     except Exception as e:
         logger.error(f"Error getting reservations: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error obteniendo reservaciones"
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error obteniendo reservaciones")
+
 
 @router.put("/reservations/{reservation_id}")
-async def update_reservation(
-    reservation_id: str,
-    update_data: ReservationUpdate,
-    admin: dict = Depends(get_current_admin)
-):
-    """Update a reservation and optionally client data"""
+async def update_reservation(reservation_id: str, update_data: ReservationUpdate, admin: dict = Depends(get_current_admin)):
     db = get_db()
     
     try:
-        # First, get the reservation to find client_id and type
         reservation = db.table('reservations').select('*, clients(*)').eq('id', reservation_id).execute()
         
         if not reservation.data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Reservación no encontrada"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservación no encontrada")
         
         res_data = reservation.data[0]
         client_id = res_data.get('client_id')
         reservation_type = res_data.get('reservation_type')
         
-        # Build update dict for reservation
         update_dict = {}
         if update_data.status is not None:
             update_dict['status'] = update_data.status
@@ -289,20 +335,15 @@ async def update_reservation(
         if update_data.notes is not None:
             update_dict['notes'] = update_data.notes
         
-        # Only allow changing num_guests for fullday reservations
         if update_data.num_guests is not None and reservation_type == 'fullday':
             update_dict['num_guests'] = update_data.num_guests
-            # Recalculate total price for fullday (€5 per person)
             from config import settings
             update_dict['total_price'] = update_data.num_guests * settings.FULLDAY_PRICE
         
-        # Update reservation if there are changes
         if update_dict:
             update_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
-            result = db.table('reservations').update(update_dict).eq('id', reservation_id).execute()
-            logger.info(f"Reservation update result: {result.data}")
+            db.table('reservations').update(update_dict).eq('id', reservation_id).execute()
         
-        # Update client data if provided
         client_update = {}
         if update_data.client_name is not None:
             client_update['full_name'] = update_data.client_name
@@ -311,26 +352,19 @@ async def update_reservation(
         
         if client_update and client_id:
             client_update['updated_at'] = datetime.now(timezone.utc).isoformat()
-            client_result = db.table('clients').update(client_update).eq('id', client_id).execute()
-            logger.info(f"Client update result: {client_result.data}")
+            db.table('clients').update(client_update).eq('id', client_id).execute()
         
         return {"message": "Reservación actualizada", "success": True}
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error updating reservation: {str(e)}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error actualizando reservación: {str(e)}"
-        )
+        logger.error(f"Error updating reservation: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error actualizando reservación")
+
 
 @router.delete("/reservations/{reservation_id}")
-async def cancel_reservation(
-    reservation_id: str,
-    admin: dict = Depends(get_current_admin)
-):
-    """Cancel (soft delete) a reservation"""
+async def cancel_reservation(reservation_id: str, admin: dict = Depends(get_current_admin)):
     db = get_db()
     
     try:
@@ -340,10 +374,7 @@ async def cancel_reservation(
         }).eq('id', reservation_id).execute()
         
         if not result.data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Reservación no encontrada"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservación no encontrada")
         
         return {"message": "Reservación cancelada", "data": result.data[0]}
         
@@ -351,125 +382,79 @@ async def cancel_reservation(
         raise
     except Exception as e:
         logger.error(f"Error cancelling reservation: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error cancelando reservación"
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error cancelando reservación")
 
 
 @router.delete("/reservations/{reservation_id}/permanent")
-async def permanently_delete_reservation(
-    reservation_id: str,
-    admin: dict = Depends(get_current_admin)
-):
-    """Permanently delete a cancelled reservation from the database"""
+async def permanently_delete_reservation(reservation_id: str, admin: dict = Depends(get_current_admin)):
     db = get_db()
     
     try:
-        # First check if the reservation exists and is cancelled
         reservation = db.table('reservations').select('*').eq('id', reservation_id).execute()
         
         if not reservation.data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Reservación no encontrada"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reservación no encontrada")
         
         if reservation.data[0]['status'] != 'cancelled':
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Solo se pueden eliminar permanentemente las reservaciones canceladas"
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Solo se pueden eliminar reservaciones canceladas")
         
-        # Delete related records in reservation_rooms first
         db.table('reservation_rooms').delete().eq('reservation_id', reservation_id).execute()
+        db.table('reservations').delete().eq('id', reservation_id).execute()
         
-        # Then delete the reservation
-        result = db.table('reservations').delete().eq('id', reservation_id).execute()
-        
-        # Verify the deletion actually happened
         verify = db.table('reservations').select('id').eq('id', reservation_id).execute()
         if verify.data:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="No se pudo eliminar la reservación. Es necesario agregar políticas RLS de DELETE en Supabase. Contacte al administrador del sistema."
-            )
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No se pudo eliminar. Verifique políticas RLS en Supabase.")
         
         return {"message": "Reservación eliminada permanentemente", "success": True}
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error permanently deleting reservation: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error eliminando reservación permanentemente"
-        )
+        logger.error(f"Error deleting reservation: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error eliminando reservación")
 
 
 @router.delete("/reservations/cancelled/all")
-async def delete_all_cancelled_reservations(
-    admin: dict = Depends(get_current_admin)
-):
-    """Permanently delete ALL cancelled reservations from the database"""
+async def delete_all_cancelled_reservations(admin: dict = Depends(get_current_admin)):
     db = get_db()
     
     try:
-        # Get all cancelled reservations
         cancelled = db.table('reservations').select('id').eq('status', 'cancelled').execute()
         
         if not cancelled.data:
-            return {"message": "No hay reservaciones canceladas para eliminar", "deleted_count": 0}
+            return {"message": "No hay reservaciones canceladas", "deleted_count": 0}
         
         initial_count = len(cancelled.data)
-        reservation_ids = [r['id'] for r in cancelled.data]
         
-        # Delete related records in reservation_rooms first
-        for res_id in reservation_ids:
+        for res_id in [r['id'] for r in cancelled.data]:
             db.table('reservation_rooms').delete().eq('reservation_id', res_id).execute()
         
-        # Then delete all cancelled reservations
         db.table('reservations').delete().eq('status', 'cancelled').execute()
         
-        # Verify the deletion actually happened
         verify = db.table('reservations').select('id').eq('status', 'cancelled').execute()
         deleted_count = initial_count - len(verify.data)
         
         if deleted_count == 0:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="No se pudieron eliminar las reservaciones. Es necesario agregar políticas RLS de DELETE en Supabase. Ejecute el script SQL proporcionado en la documentación."
-            )
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No se pudieron eliminar. Verifique políticas RLS.")
         
-        return {
-            "message": f"Se eliminaron {deleted_count} reservaciones canceladas permanentemente",
-            "deleted_count": deleted_count,
-            "success": True
-        }
+        return {"message": f"Se eliminaron {deleted_count} reservaciones", "deleted_count": deleted_count, "success": True}
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error deleting all cancelled reservations: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error eliminando reservaciones canceladas"
-        )
+        logger.error(f"Error deleting cancelled: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error eliminando reservaciones")
 
 
 # =====================================================
 # AVAILABILITY BLOCKS ENDPOINTS
 # =====================================================
-
 @router.get("/blocks")
 async def get_all_blocks(admin: dict = Depends(get_current_admin)):
-    """Get all availability blocks"""
     db = get_db()
     
     try:
-        result = db.table('availability_blocks').select(
-            '*, rooms(name)'
-        ).order('start_date', desc=False).execute()
+        result = db.table('availability_blocks').select('*, rooms(name)').order('start_date', desc=False).execute()
         
         blocks = []
         for block in result.data:
@@ -489,32 +474,20 @@ async def get_all_blocks(admin: dict = Depends(get_current_admin)):
         
     except Exception as e:
         logger.error(f"Error getting blocks: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error obteniendo bloqueos"
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error obteniendo bloqueos")
 
 
 @router.post("/blocks")
-async def create_block(
-    block_data: BlockCreate,
-    admin: dict = Depends(get_current_admin)
-):
-    """Create a new availability block"""
+async def create_block(block_data: BlockCreate, admin: dict = Depends(get_current_admin)):
     db = get_db()
     
     try:
-        # Validate dates
         start = datetime.strptime(block_data.start_date, '%Y-%m-%d').date()
         end = datetime.strptime(block_data.end_date, '%Y-%m-%d').date()
         
         if end < start:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="La fecha de fin debe ser igual o posterior a la fecha de inicio"
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="La fecha de fin debe ser posterior a la de inicio")
         
-        # Create block
         block_insert = {
             'room_id': block_data.room_id if block_data.room_id else None,
             'start_date': block_data.start_date,
@@ -528,10 +501,7 @@ async def create_block(
         result = db.table('availability_blocks').insert(block_insert).execute()
         
         if not result.data:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Error creando bloqueo"
-            )
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error creando bloqueo")
         
         return {"message": "Bloqueo creado exitosamente", "data": result.data[0]}
         
@@ -539,28 +509,18 @@ async def create_block(
         raise
     except Exception as e:
         logger.error(f"Error creating block: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error creando bloqueo: {str(e)}"
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error creando bloqueo")
 
 
 @router.delete("/blocks/{block_id}")
-async def delete_block(
-    block_id: str,
-    admin: dict = Depends(get_current_admin)
-):
-    """Delete an availability block"""
+async def delete_block(block_id: str, admin: dict = Depends(get_current_admin)):
     db = get_db()
     
     try:
         result = db.table('availability_blocks').delete().eq('id', block_id).execute()
         
         if not result.data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Bloqueo no encontrado"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bloqueo no encontrado")
         
         return {"message": "Bloqueo eliminado exitosamente"}
         
@@ -568,7 +528,4 @@ async def delete_block(
         raise
     except Exception as e:
         logger.error(f"Error deleting block: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error eliminando bloqueo"
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error eliminando bloqueo")

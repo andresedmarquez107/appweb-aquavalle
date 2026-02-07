@@ -1,7 +1,11 @@
 import axios from 'axios';
-const API = "https://appweb-aquavalleapi.onrender.com/api";
-
+//const API = "https://appweb-aquavalleapi.onrender.com/api";
+//const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8001";
+//const API = `${BACKEND_URL}/api`;
 // Rooms API
+const API = process.env.REACT_APP_BACKEND_URL 
+  ? `${process.env.REACT_APP_BACKEND_URL}/api`
+  : "https://appweb-aquavalleapi.onrender.com/api";
 export const roomsAPI = {
   getAll: async () => {
     try {
@@ -122,6 +126,19 @@ export const reservationsAPI = {
 export const adminAPI = {
   login: async (email, password) => {
     const response = await axios.post(`${API}/admin/login`, { email, password });
+    return response.data;
+  },
+
+  requestPasswordReset: async () => {
+    const response = await axios.post(`${API}/admin/request-password-reset`, {});
+    return response.data;
+  },
+
+  resetPassword: async (resetCode, newPassword) => {
+    const response = await axios.post(`${API}/admin/reset-password`, {
+      reset_code: resetCode,
+      new_password: newPassword
+    });
     return response.data;
   },
 
