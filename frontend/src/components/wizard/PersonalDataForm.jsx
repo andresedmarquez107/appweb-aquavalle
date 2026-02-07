@@ -328,7 +328,7 @@ export const PersonalDataForm = ({ onSubmit, onBack, initialData }) => {
               <User size={16} className="text-emerald-600" />
               Nombre Completo *
             </Label>
-            <div className="relative">
+            <div>
               <Input
                 id="name"
                 type="text"
@@ -339,14 +339,15 @@ export const PersonalDataForm = ({ onSubmit, onBack, initialData }) => {
                 maxLength={MAX_NAME_LENGTH}
                 required
               />
-              {errors.name && (
-                <div className="absolute -bottom-5 left-0 flex items-center gap-1 text-red-500 text-xs">
-                  <AlertCircle size={12} />
-                  {errors.name}
-                </div>
-              )}
             </div>
-            <p className="text-xs text-stone-400 text-right">{formData.name.length}/{MAX_NAME_LENGTH}</p>
+            {errors.name ? (
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <AlertCircle size={12} />
+                {errors.name}
+              </p>
+            ) : (
+              <p className="text-xs text-stone-400 text-right">{formData.name.length}/{MAX_NAME_LENGTH}</p>
+            )}
           </div>
 
           {/* ID Document */}
@@ -383,7 +384,7 @@ export const PersonalDataForm = ({ onSubmit, onBack, initialData }) => {
             </div>
 
             {/* Input del documento */}
-            <div className="relative">
+            <div>
               <Input
                 id="idDocument"
                 type="text"
@@ -394,21 +395,22 @@ export const PersonalDataForm = ({ onSubmit, onBack, initialData }) => {
                 className={`border-2 ${errors.idDocument ? 'border-red-400' : ''}`}
                 required
               />
-              {errors.idDocument && (
-                <div className="absolute -bottom-5 left-0 flex items-center gap-1 text-red-500 text-xs">
-                  <AlertCircle size={12} />
-                  {errors.idDocument}
-                </div>
-              )}
             </div>
-            <p className="text-xs text-stone-400">
-              {docType === 'cedula' 
-                ? (cedulaType === 'V' 
-                    ? `Mínimo 7, máximo 8 números (${formData.idDocument.length}/8)`
-                    : `Mínimo 8, máximo 10 números (${formData.idDocument.length}/10)`)
-                : `Mínimo 8, máximo 9 caracteres (${formData.idDocument.length}/9)`
-              }
-            </p>
+            {errors.idDocument ? (
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <AlertCircle size={12} />
+                {errors.idDocument}
+              </p>
+            ) : (
+              <p className="text-xs text-stone-400">
+                {docType === 'cedula' 
+                  ? (cedulaType === 'V' 
+                      ? `Mínimo 7, máximo 8 números (${formData.idDocument.length}/8)`
+                      : `Mínimo 8, máximo 10 números (${formData.idDocument.length}/10)`)
+                  : `Mínimo 8, máximo 9 caracteres (${formData.idDocument.length}/9)`
+                }
+              </p>
+            )}
           </div>
 
           {/* Phone */}
@@ -436,7 +438,7 @@ export const PersonalDataForm = ({ onSubmit, onBack, initialData }) => {
               </Select>
               
               {/* Input del número */}
-              <div className="relative flex-1">
+              <div className="flex-1">
                 <Input
                   id="phone"
                   type="tel"
@@ -447,20 +449,21 @@ export const PersonalDataForm = ({ onSubmit, onBack, initialData }) => {
                   className={`border-2 ${errors.phone ? 'border-red-400' : ''}`}
                   required
                 />
-                {errors.phone && (
-                  <div className="absolute -bottom-5 left-0 flex items-center gap-1 text-red-500 text-xs">
-                    <AlertCircle size={12} />
-                    {errors.phone}
-                  </div>
-                )}
               </div>
             </div>
-            <p className="text-xs text-stone-400">
-              {getSelectedCountry().country}: {getSelectedCountry().minLength === getSelectedCountry().maxLength 
-                ? `${getSelectedCountry().minLength} dígitos`
-                : `${getSelectedCountry().minLength}-${getSelectedCountry().maxLength} dígitos`
-              } ({formData.phone.length}/{getSelectedCountry().maxLength})
-            </p>
+            {errors.phone ? (
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <AlertCircle size={12} />
+                {errors.phone}
+              </p>
+            ) : (
+              <p className="text-xs text-stone-400">
+                {getSelectedCountry().country}: {getSelectedCountry().minLength === getSelectedCountry().maxLength 
+                  ? `${getSelectedCountry().minLength} dígitos`
+                  : `${getSelectedCountry().minLength}-${getSelectedCountry().maxLength} dígitos`
+                } ({formData.phone.length}/{getSelectedCountry().maxLength})
+              </p>
+            )}
           </div>
 
           {/* Email */}
@@ -469,7 +472,7 @@ export const PersonalDataForm = ({ onSubmit, onBack, initialData }) => {
               <Mail size={16} className="text-emerald-600" />
               Correo Electrónico (opcional)
             </Label>
-            <div className="relative">
+            <div>
               <Input
                 id="email"
                 type="email"
@@ -478,13 +481,13 @@ export const PersonalDataForm = ({ onSubmit, onBack, initialData }) => {
                 placeholder="Ej: juan@email.com"
                 className={`border-2 ${errors.email ? 'border-red-400' : ''}`}
               />
-              {errors.email && (
-                <div className="absolute -bottom-5 left-0 flex items-center gap-1 text-red-500 text-xs">
-                  <AlertCircle size={12} />
-                  {errors.email}
-                </div>
-              )}
             </div>
+            {errors.email && (
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <AlertCircle size={12} />
+                {errors.email}
+              </p>
+            )}
           </div>
 
           {/* Privacy notice */}
